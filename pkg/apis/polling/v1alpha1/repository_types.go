@@ -29,8 +29,7 @@ type RepositorySpec struct {
 
 // PipelineRef links to the Pipeline to execute.
 type PipelineRef struct {
-	Name   string  `json:"name"`
-	Params []Param `json:"params,omitempty"`
+	Name string `json:"name"`
 }
 
 type Param struct {
