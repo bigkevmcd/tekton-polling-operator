@@ -12,6 +12,8 @@ import (
 
 const testToken = "test12345"
 
+var _ CommitPoller = (*GitHubPoller)(nil)
+
 func TestWithUnknownETag(t *testing.T) {
 	etag := `W/"878f43039ad0553d0d3122d8bc171b01"`
 	as := makeGitHubAPIServer(t, testToken, "/repos/testing/repo/commits/master", etag, mustReadFile(t, "testdata/github_commit.json"))
@@ -19,7 +21,7 @@ func TestWithUnknownETag(t *testing.T) {
 	g := NewGitHub(as.Client(), testToken)
 	g.endpoint = as.URL
 
-	polled, err := g.Poll("testing/repo", &pollingv1alpha1.RepositoryStatus{Ref: "master"})
+	polled, err := g.Poll("testing/repo", pollingv1alpha1.PollStatus{Ref: "master"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,7 +41,7 @@ func TestWithKnownTag(t *testing.T) {
 	g := NewGitHub(as.Client(), testToken)
 	g.endpoint = as.URL
 
-	polled, err := g.Poll("testing/repo", &pollingv1alpha1.RepositoryStatus{Ref: "master", ETag: etag})
+	polled, err := g.Poll("testing/repo", pollingv1alpha1.PollStatus{Ref: "master", ETag: etag})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,7 +58,7 @@ func TestWithNotFoundResponse(t *testing.T) {
 	g := NewGitHub(as.Client(), testToken)
 	g.endpoint = as.URL
 
-	_, err := g.Poll("testing/testing", &pollingv1alpha1.RepositoryStatus{Ref: "master", ETag: etag})
+	_, err := g.Poll("testing/testing", pollingv1alpha1.PollStatus{Ref: "master", ETag: etag})
 	if err.Error() != "server error: 404" {
 		t.Fatal(err)
 	}
@@ -71,7 +73,7 @@ func TestWithBadAuthentication(t *testing.T) {
 	g := NewGitHub(as.Client(), "anotherToken")
 	g.endpoint = as.URL
 
-	_, err := g.Poll("testing/repo", &pollingv1alpha1.RepositoryStatus{Ref: "master", ETag: etag})
+	_, err := g.Poll("testing/repo", pollingv1alpha1.PollStatus{Ref: "master", ETag: etag})
 	if err.Error() != "server error: 404" {
 		t.Fatal(err)
 	}
@@ -85,7 +87,7 @@ func TestWithNoAuthentication(t *testing.T) {
 	g := NewGitHub(as.Client(), "")
 	g.endpoint = as.URL
 
-	_, err := g.Poll("testing/repo", &pollingv1alpha1.RepositoryStatus{Ref: "master", ETag: etag})
+	_, err := g.Poll("testing/repo", pollingv1alpha1.PollStatus{Ref: "master", ETag: etag})
 	if err != nil {
 		t.Fatal(err)
 	}

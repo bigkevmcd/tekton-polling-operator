@@ -3,6 +3,7 @@ package git
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
@@ -25,7 +26,7 @@ func NewGitHub(c *http.Client, authToken string) *GitHubPoller {
 	return &GitHubPoller{client: c, endpoint: "https://api.github.com", authToken: authToken}
 }
 
-func (g GitHubPoller) Poll(repo string, pr *pollingv1alpha1.RepositoryStatus) (*pollingv1alpha1.RepositoryStatus, error) {
+func (g GitHubPoller) Poll(repo string, pr pollingv1alpha1.PollStatus) (*pollingv1alpha1.PollStatus, error) {
 	requestURL, err := makeURL(g.endpoint, repo, pr.Ref)
 	if err != nil {
 		return nil, fmt.Errorf("failed to make the request URL: %w", err)
@@ -48,16 +49,17 @@ func (g GitHubPoller) Poll(repo string, pr *pollingv1alpha1.RepositoryStatus) (*
 		return nil, fmt.Errorf("server error: %d", resp.StatusCode)
 	}
 	if resp.StatusCode == http.StatusNotModified {
-		return pr, nil
+		return &pr, nil
 	}
-	dec := json.NewDecoder(resp.Body)
 	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
 	var gc githubCommit
-	err = dec.Decode(&gc)
+	err = json.Unmarshal(body, &gc)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode response body: %w", err)
 	}
-	return &pollingv1alpha1.RepositoryStatus{Ref: pr.Ref, SHA: gc.SHA, ETag: resp.Header.Get("ETag")}, nil
+	return &pollingv1alpha1.PollStatus{Ref: pr.Ref, SHA: gc.SHA, ETag: resp.Header.Get("ETag")}, nil
 }
 
 func makeURL(endpoint, repo, ref string) (string, error) {

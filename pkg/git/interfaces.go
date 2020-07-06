@@ -7,5 +7,5 @@ import (
 // CommitPoller implementations can check with an upstream Git hosting service
 // to determine the current SHA and ETag.
 type CommitPoller interface {
-	Poll(repo string, pr pollingv1alpha1.RepositoryStatus) (pollingv1alpha1.RepositoryStatus, error)
+	Poll(repo string, ps pollingv1alpha1.PollStatus) (*pollingv1alpha1.PollStatus, error)
 }

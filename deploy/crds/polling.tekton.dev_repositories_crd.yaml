@@ -29,10 +29,60 @@ spec:
           metadata:
             type: object
           spec:
-            description: RepositorySpec defines the desired state of Repository
+            description: RepositorySpec defines a repository to poll.
+            properties:
+              frequency:
+                type: string
+              ref:
+                type: string
+              secret:
+                description: AuthSecret references a secret for authenticating the
+                  request.
+                properties:
+                  key:
+                    type: string
+                  secretRef:
+                    description: SecretReference represents a Secret Reference. It
+                      has enough information to retrieve secret in any namespace
+                    properties:
+                      name:
+                        description: Name is unique within a namespace to reference
+                          a secret resource.
+                        type: string
+                      namespace:
+                        description: Namespace defines the space within which the
+                          secret name must be unique.
+                        type: string
+                    type: object
+                type: object
+              type:
+                description: RepoType defines the protocol to use to talk to the upstream
+                  server.
+                type: integer
+              url:
+                type: string
+            required:
+            - url
             type: object
           status:
             description: RepositoryStatus defines the observed state of Repository
+            properties:
+              lastError:
+                type: string
+              pollStatus:
+                description: PollStatus represents the last polled state of the repo.
+                properties:
+                  etag:
+                    type: string
+                  ref:
+                    type: string
+                  sha:
+                    type: string
+                required:
+                - etag
+                - ref
+                - sha
+                type: object
             type: object
         type: object
     served: true
