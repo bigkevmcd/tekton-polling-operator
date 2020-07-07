@@ -9,5 +9,5 @@ import (
 // PipelineRunner executes a pipeline by name, passing in the SHA and RepURL as
 // parameters.
 type PipelineRunner interface {
-	Run(ctx context.Context, repoURL, sha string) (*pipelinev1.PipelineRun, error)
+	Run(ctx context.Context, pipelineName, repoURL, sha string) (*pipelinev1.PipelineRun, error)
 }

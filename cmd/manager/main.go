@@ -16,6 +16,7 @@ import (
 	"github.com/bigkevmcd/tekton-polling-operator/pkg/apis"
 	"github.com/bigkevmcd/tekton-polling-operator/pkg/controller"
 	"github.com/bigkevmcd/tekton-polling-operator/version"
+	pipelinev1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	kubemetrics "github.com/operator-framework/operator-sdk/pkg/kube-metrics"
@@ -118,6 +119,11 @@ func main() {
 
 	// Setup Scheme for all resources
 	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
+		log.Error(err, "")
+		os.Exit(1)
+	}
+
+	if err := pipelinev1.AddToScheme(mgr.GetScheme()); err != nil {
 		log.Error(err, "")
 		os.Exit(1)
 	}

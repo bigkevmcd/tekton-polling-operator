@@ -18,7 +18,7 @@ func TestWithUnknownETag(t *testing.T) {
 	etag := `W/"878f43039ad0553d0d3122d8bc171b01"`
 	as := makeGitHubAPIServer(t, testToken, "/repos/testing/repo/commits/master", etag, mustReadFile(t, "testdata/github_commit.json"))
 	t.Cleanup(as.Close)
-	g := NewGitHub(as.Client(), testToken)
+	g := NewGitHubPoller(as.Client(), testToken)
 	g.endpoint = as.URL
 
 	polled, err := g.Poll("testing/repo", pollingv1alpha1.PollStatus{Ref: "master"})
@@ -38,7 +38,7 @@ func TestWithKnownTag(t *testing.T) {
 	etag := `W/"878f43039ad0553d0d3122d8bc171b01"`
 	as := makeGitHubAPIServer(t, testToken, "/repos/testing/repo/commits/master", etag, nil)
 	t.Cleanup(as.Close)
-	g := NewGitHub(as.Client(), testToken)
+	g := NewGitHubPoller(as.Client(), testToken)
 	g.endpoint = as.URL
 
 	polled, err := g.Poll("testing/repo", pollingv1alpha1.PollStatus{Ref: "master", ETag: etag})
@@ -55,7 +55,7 @@ func TestWithNotFoundResponse(t *testing.T) {
 	etag := `W/"878f43039ad0553d0d3122d8bc171b01"`
 	as := makeGitHubAPIServer(t, testToken, "/repos/testing/repo/commits/master", etag, nil)
 	t.Cleanup(as.Close)
-	g := NewGitHub(as.Client(), testToken)
+	g := NewGitHubPoller(as.Client(), testToken)
 	g.endpoint = as.URL
 
 	_, err := g.Poll("testing/testing", pollingv1alpha1.PollStatus{Ref: "master", ETag: etag})
@@ -70,7 +70,7 @@ func TestWithBadAuthentication(t *testing.T) {
 	etag := `W/"878f43039ad0553d0d3122d8bc171b01"`
 	as := makeGitHubAPIServer(t, testToken, "/repos/testing/repo/commits/master", etag, nil)
 	t.Cleanup(as.Close)
-	g := NewGitHub(as.Client(), "anotherToken")
+	g := NewGitHubPoller(as.Client(), "anotherToken")
 	g.endpoint = as.URL
 
 	_, err := g.Poll("testing/repo", pollingv1alpha1.PollStatus{Ref: "master", ETag: etag})
@@ -84,7 +84,7 @@ func TestWithNoAuthentication(t *testing.T) {
 	etag := `W/"878f43039ad0553d0d3122d8bc171b01"`
 	as := makeGitHubAPIServer(t, "", "/repos/testing/repo/commits/master", etag, nil)
 	t.Cleanup(as.Close)
-	g := NewGitHub(as.Client(), "")
+	g := NewGitHubPoller(as.Client(), "")
 	g.endpoint = as.URL
 
 	_, err := g.Poll("testing/repo", pollingv1alpha1.PollStatus{Ref: "master", ETag: etag})

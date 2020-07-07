@@ -33,9 +33,17 @@ spec:
             properties:
               frequency:
                 type: string
+              pipelineRef:
+                description: PipelineRef links to the Pipeline to execute.
+                properties:
+                  name:
+                    type: string
+                required:
+                - name
+                type: object
               ref:
                 type: string
-              secret:
+              secretRef:
                 description: AuthSecret references a secret for authenticating the
                   request.
                 properties:
@@ -62,6 +70,7 @@ spec:
               url:
                 type: string
             required:
+            - pipelineRef
             - url
             type: object
           status:

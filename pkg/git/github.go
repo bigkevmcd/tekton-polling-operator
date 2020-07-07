@@ -21,8 +21,8 @@ const (
 	chitauriPreview = "application/vnd.github.chitauri-preview+sha"
 )
 
-// NewGitHub creates a new GitHub poller.
-func NewGitHub(c *http.Client, authToken string) *GitHubPoller {
+// NewGitHubPoller creates a new GitHub poller.
+func NewGitHubPoller(c *http.Client, authToken string) *GitHubPoller {
 	return &GitHubPoller{client: c, endpoint: "https://api.github.com", authToken: authToken}
 }
 

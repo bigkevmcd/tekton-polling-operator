@@ -19,9 +19,10 @@ const (
 type RepositorySpec struct {
 	URL       string           `json:"url"`
 	Ref       string           `json:"ref,omitempty"`
-	Auth      AuthSecret       `json:"secret,omitempty"`
+	Auth      AuthSecret       `json:"secretRef,omitempty"`
 	Type      RepoType         `json:"type,omitempty"`
 	Frequency *metav1.Duration `json:"frequency,omitempty"`
+	Pipeline  PipelineRef      `json:"pipelineRef"`
 
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
@@ -32,11 +33,6 @@ type PipelineRef struct {
 	Name string `json:"name"`
 }
 
-type Param struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
-}
-
 // AuthSecret references a secret for authenticating the request.
 type AuthSecret struct {
 	corev1.SecretReference `json:"secretRef,omitempty"`
@@ -45,8 +41,10 @@ type AuthSecret struct {
 
 // RepositoryStatus defines the observed state of Repository
 type RepositoryStatus struct {
-	LastError  string `json:"lastError,omitempty"`
-	PollStatus `json:"pollStatus,omitempty"`
+	LastError          string `json:"lastError,omitempty"`
+	PollStatus         `json:"pollStatus,omitempty"`
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
+
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
 }
