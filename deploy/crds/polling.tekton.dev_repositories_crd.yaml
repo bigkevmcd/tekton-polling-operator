@@ -31,19 +31,7 @@ spec:
           spec:
             description: RepositorySpec defines a repository to poll.
             properties:
-              frequency:
-                type: string
-              pipelineRef:
-                description: PipelineRef links to the Pipeline to execute.
-                properties:
-                  name:
-                    type: string
-                required:
-                - name
-                type: object
-              ref:
-                type: string
-              secretRef:
+              auth:
                 description: AuthSecret references a secret for authenticating the
                   request.
                 properties:
@@ -63,6 +51,18 @@ spec:
                         type: string
                     type: object
                 type: object
+              frequency:
+                type: string
+              pipelineRef:
+                description: PipelineRef links to the Pipeline to execute.
+                properties:
+                  name:
+                    type: string
+                required:
+                - name
+                type: object
+              ref:
+                type: string
               type:
                 description: RepoType defines the protocol to use to talk to the upstream
                   server.
@@ -78,6 +78,9 @@ spec:
             properties:
               lastError:
                 type: string
+              observedGeneration:
+                format: int64
+                type: integer
               pollStatus:
                 description: PollStatus represents the last polled state of the repo.
                 properties:

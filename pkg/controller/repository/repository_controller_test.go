@@ -19,6 +19,7 @@ import (
 	pollingv1 "github.com/bigkevmcd/tekton-polling-operator/pkg/apis/polling/v1alpha1"
 	"github.com/bigkevmcd/tekton-polling-operator/pkg/git"
 	"github.com/bigkevmcd/tekton-polling-operator/pkg/pipelines"
+	"github.com/bigkevmcd/tekton-polling-operator/pkg/secrets"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -41,14 +42,12 @@ var _ reconcile.Reconciler = &ReconcileRepository{}
 func TestReconcileRepositoryWithEmptyPollState(t *testing.T) {
 	logf.SetLogger(logf.ZapLogger(true))
 	repo := makeRepository()
-	cl, r := makeReconciler(t, repo, repo, makeTestSecret(testSecretName))
+	cl, r := makeReconciler(t, repo, repo)
 	req := makeReconcileRequest()
 	ctx := context.Background()
 
 	res, err := r.Reconcile(req)
-	if err != nil {
-		t.Fatal(err)
-	}
+	fatalIfError(t, err)
 	wantResult := reconcile.Result{
 		RequeueAfter: time.Second * 10,
 	}
@@ -58,10 +57,7 @@ func TestReconcileRepositoryWithEmptyPollState(t *testing.T) {
 
 	loaded := &pollingv1.Repository{}
 	err = cl.Get(ctx, req.NamespacedName, loaded)
-	if err != nil {
-		t.Fatal(err)
-	}
-
+	fatalIfError(t, err)
 	r.pipelineRunner.(*pipelines.MockRunner).AssertPipelineRun(testPipelineName, testRepoURL, testCommitSHA)
 
 	wantStatus := pollingv1.RepositoryStatus{
@@ -77,34 +73,71 @@ func TestReconcileRepositoryWithEmptyPollState(t *testing.T) {
 }
 
 func TestReconcileRepositoryWithAuthSecret(t *testing.T) {
-	t.Skip()
+	authTests := []struct {
+		authSecret pollingv1.AuthSecret
+		secretKey  string
+	}{
+		{
+			pollingv1.AuthSecret{
+				SecretReference: corev1.SecretReference{
+					Name: testSecretName,
+				},
+			},
+			"token",
+		},
+		{
+			pollingv1.AuthSecret{
+				SecretReference: corev1.SecretReference{
+					Name: testSecretName,
+				},
+				Key: "custom-key",
+			},
+			"custom-key",
+		},
+	}
+
+	for _, tt := range authTests {
+		logf.SetLogger(logf.ZapLogger(true))
+		repo := makeRepository()
+		repo.Spec.Auth = &tt.authSecret
+		_, r := makeReconciler(t, repo, repo, makeTestSecret(testSecretName, tt.secretKey))
+		r.pollerFactory = func(token string) git.CommitPoller {
+			if token != testAuthToken {
+				t.Fatal("required auth token not provided")
+			}
+			p := git.NewMockPoller()
+			p.AddMockResponse(
+				testRepo, pollingv1.PollStatus{Ref: testRef},
+				pollingv1.PollStatus{Ref: testRef, SHA: testCommitSHA,
+					ETag: testCommitETag})
+			return p
+		}
+		req := makeReconcileRequest()
+		_, err := r.Reconcile(req)
+		fatalIfError(t, err)
+	}
 }
 
 func TestReconcileRepositoryErrorPolling(t *testing.T) {
 	logf.SetLogger(logf.ZapLogger(true))
 	repo := makeRepository()
-	cl, r := makeReconciler(t, repo, repo, makeTestSecret(testSecretName))
+	cl, r := makeReconciler(t, repo, repo)
 	req := makeReconcileRequest()
 	ctx := context.Background()
 	failingErr := errors.New("failing")
-	r.poller.(*git.MockPoller).FailWithError(failingErr)
-
-	res, err := r.Reconcile(req)
+	r.pollerFactory = func(token string) git.CommitPoller {
+		p := git.NewMockPoller()
+		p.FailWithError(failingErr)
+		return p
+	}
+	_, err := r.Reconcile(req)
 	if err != failingErr {
-		t.Fatal(err)
-	}
-	wantResult := reconcile.Result{
-		Requeue: true,
-	}
-	if diff := cmp.Diff(wantResult, res); diff != "" {
-		t.Fatalf("reconciliation result is different:\n%s", diff)
+		t.Fatalf("got %#v, want %#v", err, failingErr)
 	}
 
 	loaded := &pollingv1.Repository{}
 	err = cl.Get(ctx, req.NamespacedName, loaded)
-	if err != nil {
-		t.Fatal(err)
-	}
+	fatalIfError(t, err)
 	wantStatus := pollingv1.RepositoryStatus{
 		LastError: "failing",
 		PollStatus: pollingv1.PollStatus{
@@ -118,7 +151,54 @@ func TestReconcileRepositoryErrorPolling(t *testing.T) {
 }
 
 func TestReconcileRepositoryWithUnchangedState(t *testing.T) {
-	t.Skip()
+	logf.SetLogger(logf.ZapLogger(true))
+	repo := makeRepository()
+	_, r := makeReconciler(t, repo, repo)
+	req := makeReconcileRequest()
+	_, err := r.Reconcile(req)
+	fatalIfError(t, err)
+	r.pipelineRunner = pipelines.NewMockRunner(t)
+
+	_, err = r.Reconcile(req)
+
+	fatalIfError(t, err)
+	r.pipelineRunner.(*pipelines.MockRunner).RefutePipelineRun(testPipelineName, testRepoURL, testCommitSHA)
+}
+
+func TestReconcileRepositoryClearsLastErrorOnSuccessfulPoll(t *testing.T) {
+	logf.SetLogger(logf.ZapLogger(true))
+	ctx := context.Background()
+	repo := makeRepository()
+	cl, r := makeReconciler(t, repo, repo)
+	failingErr := errors.New("failing")
+	savedFactory := r.pollerFactory
+	r.pollerFactory = func(token string) git.CommitPoller {
+		p := git.NewMockPoller()
+		p.FailWithError(failingErr)
+		return p
+	}
+
+	req := makeReconcileRequest()
+	_, err := r.Reconcile(req)
+	if err != failingErr {
+		t.Fatalf("got %#v, want %#v", err, failingErr)
+	}
+
+	loaded := &pollingv1.Repository{}
+	err = cl.Get(ctx, req.NamespacedName, loaded)
+	fatalIfError(t, err)
+	if loaded.Status.LastError != "failing" {
+		t.Fatalf("got %#v, want %#v", loaded.Status.LastError, "failing")
+	}
+
+	r.pollerFactory = savedFactory
+	_, err = r.Reconcile(req)
+	fatalIfError(t, err)
+	fatalIfError(t, cl.Get(ctx, req.NamespacedName, loaded))
+	if err != nil {
+		t.Fatal(err)
+	}
+
 }
 
 func makeRepository() *pollingv1.Repository {
@@ -128,13 +208,8 @@ func makeRepository() *pollingv1.Repository {
 			Namespace: testRepositoryNamespace,
 		},
 		Spec: pollingv1.RepositorySpec{
-			URL: testRepoURL,
-			Ref: testRef,
-			Auth: pollingv1.AuthSecret{
-				SecretReference: corev1.SecretReference{
-					Name: testSecretName,
-				},
-			},
+			URL:       testRepoURL,
+			Ref:       testRef,
 			Type:      pollingv1.GitHub,
 			Frequency: &metav1.Duration{Duration: testFrequency},
 			Pipeline:  pollingv1.PipelineRef{Name: testPipelineName},
@@ -152,7 +227,7 @@ func makeReconcileRequest() reconcile.Request {
 	}
 }
 
-func makeTestSecret(n string) *corev1.Secret {
+func makeTestSecret(n, key string) *corev1.Secret {
 	return &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "v1",
@@ -163,7 +238,7 @@ func makeTestSecret(n string) *corev1.Secret {
 			Namespace: testRepositoryNamespace,
 		},
 		Data: map[string][]byte{
-			"token": []byte(testAuthToken),
+			key: []byte(testAuthToken),
 		},
 	}
 }
@@ -172,13 +247,26 @@ func makeReconciler(t *testing.T, pr *pollingv1.Repository, objs ...runtime.Obje
 	s := scheme.Scheme
 	s.AddKnownTypes(pollingv1.SchemeGroupVersion, pr)
 	cl := fake.NewFakeClientWithScheme(s, objs...)
-	// TODO: reorganise this to make it easier to pass in.
 	p := git.NewMockPoller()
-	p.AddMockResponse(testRepo, pollingv1.PollStatus{Ref: testRef}, &pollingv1.PollStatus{Ref: testRef, SHA: testCommitSHA, ETag: testCommitETag})
+	p.AddMockResponse(testRepo, pollingv1.PollStatus{Ref: testRef},
+		pollingv1.PollStatus{Ref: testRef, SHA: testCommitSHA,
+			ETag: testCommitETag})
+	pollerFactory := func(token string) git.CommitPoller {
+		return p
+	}
 	return cl, &ReconcileRepository{
 		client:         cl,
 		scheme:         s,
-		poller:         p,
+		pollerFactory:  pollerFactory,
 		pipelineRunner: pipelines.NewMockRunner(t),
+		secretGetter:   secrets.New(cl),
+		log:            logf.Log.WithName("testing"),
+	}
+}
+
+func fatalIfError(t *testing.T, err error) {
+	t.Helper()
+	if err != nil {
+		t.Fatal(err)
 	}
 }

@@ -19,7 +19,7 @@ const (
 type RepositorySpec struct {
 	URL       string           `json:"url"`
 	Ref       string           `json:"ref,omitempty"`
-	Auth      AuthSecret       `json:"secretRef,omitempty"`
+	Auth      *AuthSecret      `json:"auth,omitempty"`
 	Type      RepoType         `json:"type,omitempty"`
 	Frequency *metav1.Duration `json:"frequency,omitempty"`
 	Pipeline  PipelineRef      `json:"pipelineRef"`

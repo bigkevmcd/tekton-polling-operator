@@ -17,7 +17,7 @@ var testID = types.NamespacedName{Name: "test-secret", Namespace: "test-ns"}
 func TestSecretToken(t *testing.T) {
 	g := New(fake.NewFakeClient(createSecret(testID, "secret-token")))
 
-	secret, err := g.SecretToken(context.TODO(), testID)
+	secret, err := g.SecretToken(context.TODO(), testID, "token")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -27,10 +27,19 @@ func TestSecretToken(t *testing.T) {
 	}
 }
 
+func TestSecretTokenWithMissingKey(t *testing.T) {
+	g := New(fake.NewFakeClient(createSecret(testID, "secret-token")))
+
+	_, err := g.SecretToken(context.TODO(), testID, "unknown")
+	if err.Error() != `secret invalid, no "unknown" key in test-ns/test-secret` {
+		t.Fatal(err)
+	}
+}
+
 func TestSecretTokenWithMissingSecret(t *testing.T) {
 	g := New(fake.NewFakeClient())
 
-	_, err := g.SecretToken(context.TODO(), testID)
+	_, err := g.SecretToken(context.TODO(), testID, "token")
 	if err.Error() != `error getting secret test-ns/test-secret: secrets "test-secret" not found` {
 		t.Fatal(err)
 	}

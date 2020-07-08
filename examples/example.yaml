@@ -1,0 +1,10 @@
+apiVersion: polling.tekton.dev/v1alpha1
+kind: Repository
+metadata:
+  name: example-repository
+spec:
+  url: https://github.com/my-org/my-repo.git
+  ref: main
+  frequency: 5m
+  pipelineRef:
+    name: github-poll-pipeline

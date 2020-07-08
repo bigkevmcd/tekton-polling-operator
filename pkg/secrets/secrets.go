@@ -21,17 +21,17 @@ func New(c client.Client) *KubeSecretGetter {
 	}
 }
 
-// SecretToken looks for a namespaced secret, and returns the 'token' key from
+// SecretToken looks for a namespaced secret, and returns the key from
 // it, or an error if not found.
-func (k KubeSecretGetter) SecretToken(ctx context.Context, id types.NamespacedName) (string, error) {
+func (k KubeSecretGetter) SecretToken(ctx context.Context, id types.NamespacedName, key string) (string, error) {
 	loaded := &corev1.Secret{}
 	err := k.kubeClient.Get(context.TODO(), id, loaded)
 	if err != nil {
 		return "", fmt.Errorf("error getting secret %s/%s: %w", id.Namespace, id.Name, err)
 	}
-	token, ok := loaded.Data["token"]
+	token, ok := loaded.Data[key]
 	if !ok {
-		return "", fmt.Errorf("secret invalid, no 'token' key in %s/%s", id.Namespace, id.Name)
+		return "", fmt.Errorf("secret invalid, no %#v key in %s/%s", key, id.Namespace, id.Name)
 	}
 	return string(token), nil
 }

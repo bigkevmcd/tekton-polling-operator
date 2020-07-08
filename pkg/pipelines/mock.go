@@ -33,7 +33,7 @@ func (m *MockRunner) Run(ctx context.Context, pipelineName, repoURL, sha string)
 func (m *MockRunner) AssertPipelineRun(pipelineName, repoURL, wantSHA string) {
 	sha, ok := m.runs[mockKey(pipelineName, repoURL)]
 	if !ok {
-		m.t.Fatalf("no pipelinerun for %s / %s", pipelineName, repoURL)
+		m.t.Fatalf("no pipeline run for %s / %s", pipelineName, repoURL)
 	}
 	if sha != wantSHA {
 		m.t.Fatalf("incorrect sha for pipeline run, got %#v, want %#v", sha, wantSHA)
@@ -44,7 +44,7 @@ func (m *MockRunner) AssertPipelineRun(pipelineName, repoURL, wantSHA string) {
 func (m *MockRunner) RefutePipelineRun(pipelineName, repoURL, wantSHA string) {
 	sha := m.runs[mockKey(pipelineName, repoURL)]
 	if sha == wantSHA {
-		m.t.Fatalf("pipeline run SHA matched")
+		m.t.Fatalf("pipeline run with SHA %#v was run", wantSHA)
 	}
 }
 

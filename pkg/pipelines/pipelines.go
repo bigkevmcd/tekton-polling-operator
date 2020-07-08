@@ -2,6 +2,7 @@ package pipelines
 
 import (
 	"context"
+	"fmt"
 
 	pipelinev1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -32,7 +33,7 @@ func (c *ClientPipelineRunner) Run(ctx context.Context, pipelineName, repoURL, s
 	pr := c.makePipelineRun(pipelineName, repoURL, sha)
 	err := c.client.Create(ctx, pr)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create a pipeline run for pipeline %s: %w", pipelineName, err)
 	}
 	return pr, nil
 }
@@ -56,7 +57,6 @@ func (c *ClientPipelineRunner) makePipelineRun(pipelineName, repoURL, sha string
 func objectMetaCreator() metav1.ObjectMeta {
 	return metav1.ObjectMeta{
 		GenerateName: pipelineRunNames,
-		// TODO: fix this!
-		Namespace: "default",
+		Namespace:    "default",
 	}
 }
