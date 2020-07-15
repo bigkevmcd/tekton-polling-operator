@@ -6,40 +6,33 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"path"
+	"strings"
 
 	pollingv1 "github.com/bigkevmcd/tekton-polling-operator/pkg/apis/polling/v1alpha1"
 )
 
 // TODO: add logging - especially of the response body.
 
-type GitHubPoller struct {
+type GitLabPoller struct {
 	client    *http.Client
 	endpoint  string
 	authToken string
 }
 
-const (
-	chitauriPreview = "application/vnd.github.chitauri-preview+sha"
-)
-
-// NewGitHubPoller creates a new GitHub poller.
-func NewGitHubPoller(c *http.Client, authToken string) *GitHubPoller {
-	return &GitHubPoller{client: c, endpoint: "https://api.github.com", authToken: authToken}
+// NewGitLabPoller creates a new GitLab poller.
+func NewGitLabPoller(c *http.Client, authToken string) *GitLabPoller {
+	return &GitLabPoller{client: c, endpoint: "https://gitlab.com", authToken: authToken}
 }
 
-func (g GitHubPoller) Poll(repo string, pr pollingv1.PollStatus) (pollingv1.PollStatus, error) {
-	requestURL, err := makeGitHubURL(g.endpoint, repo, pr.Ref)
-	if err != nil {
-		return pollingv1.PollStatus{}, fmt.Errorf("failed to make the request URL: %w", err)
-	}
+func (g GitLabPoller) Poll(repo string, pr pollingv1.PollStatus) (pollingv1.PollStatus, error) {
+	requestURL := makeGitLabURL(g.endpoint, repo, pr.Ref)
 	req, err := http.NewRequest("GET", requestURL, nil)
 	if pr.ETag != "" {
 		req.Header.Add("If-None-Match", pr.ETag)
 	}
 	req.Header.Add("Accept", chitauriPreview)
 	if g.authToken != "" {
-		req.Header.Add("Authorization", fmt.Sprintf("token %s", g.authToken))
+		req.Header.Add("Private-Token", g.authToken)
 	}
 	resp, err := g.client.Do(req)
 	if err != nil {
@@ -56,23 +49,23 @@ func (g GitHubPoller) Poll(repo string, pr pollingv1.PollStatus) (pollingv1.Poll
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
-	var gc githubCommit
+	var gc []gitlabCommit
 	err = json.Unmarshal(body, &gc)
 	if err != nil {
 		return pollingv1.PollStatus{}, fmt.Errorf("failed to decode response body: %w", err)
 	}
-	return pollingv1.PollStatus{Ref: pr.Ref, SHA: gc.SHA, ETag: resp.Header.Get("ETag")}, nil
+	return pollingv1.PollStatus{Ref: pr.Ref, SHA: gc[0].ID, ETag: resp.Header.Get("ETag")}, nil
 }
 
-func makeGitHubURL(endpoint, repo, ref string) (string, error) {
-	parsed, err := url.Parse(endpoint)
-	if err != nil {
-		return "", err
+func makeGitLabURL(endpoint, repo, ref string) string {
+	values := url.Values{
+		"ref": []string{ref},
 	}
-	parsed.Path = path.Join("repos", repo, "commits", ref)
-	return parsed.String(), nil
+	return fmt.Sprintf("%s/api/v4/projects/%s/repository/commits?%s",
+		endpoint, strings.Replace(repo, "/", "%2F", -1),
+		values.Encode())
 }
 
-type githubCommit struct {
-	SHA string `json:"sha"`
+type gitlabCommit struct {
+	ID string `json:"id"`
 }

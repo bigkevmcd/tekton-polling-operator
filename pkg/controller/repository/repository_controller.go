@@ -31,14 +31,14 @@ func Add(mgr manager.Manager) error {
 	return add(mgr, newReconciler(mgr))
 }
 
-type commitPollerFactory func(authToken string) git.CommitPoller
+type commitPollerFactory func(repo *pollingv1.Repository, authToken string) git.CommitPoller
 
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	return &ReconcileRepository{
 		client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
-		pollerFactory: func(token string) git.CommitPoller {
-			return makeCommitPoller(token)
+		pollerFactory: func(repo *pollingv1.Repository, token string) git.CommitPoller {
+			return makeCommitPoller(repo, token)
 		},
 		pipelineRunner: pipelines.NewRunner(mgr.GetClient()),
 		secretGetter:   secrets.New(mgr.GetClient()),
@@ -103,7 +103,8 @@ func (r *ReconcileRepository) Reconcile(req reconcile.Request) (reconcile.Result
 	}
 
 	repo.Status.PollStatus.Ref = repo.Spec.Ref
-	newStatus, err := r.pollerFactory(authToken).Poll(repoName, repo.Status.PollStatus)
+	// TODO: handle pollerFactory returning nil/error
+	newStatus, err := r.pollerFactory(repo, authToken).Poll(repoName, repo.Status.PollStatus)
 	if err != nil {
 		repo.Status.LastError = err.Error()
 		reqLogger.Error(err, "Repository poll failed")
@@ -160,8 +161,14 @@ func (r *ReconcileRepository) authTokenForRepo(ctx context.Context, logger logr.
 // What about non-public URLs?
 // TODO: pass the logger through so that we can log out errors from this and
 // also the pipelinerun creator.
-func makeCommitPoller(authToken string) git.CommitPoller {
-	return git.NewGitHubPoller(http.DefaultClient, authToken)
+func makeCommitPoller(repo *pollingv1.Repository, authToken string) git.CommitPoller {
+	switch repo.Spec.Type {
+	case pollingv1.GitHub:
+		return git.NewGitHubPoller(http.DefaultClient, authToken)
+	case pollingv1.GitLab:
+		return git.NewGitLabPoller(http.DefaultClient, authToken)
+	}
+	return nil
 }
 
 func repoFromURL(s string) (string, error) {

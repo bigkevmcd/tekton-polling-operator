@@ -8,11 +8,12 @@ import (
 )
 
 // RepoType defines the protocol to use to talk to the upstream server.
-type RepoType int
+// +kubebuilder:validation:Enum=github;gitlab
+type RepoType string
 
-// State values.
 const (
-	GitHub RepoType = iota
+	GitHub RepoType = "github"
+	GitLab RepoType = "gitlab"
 )
 
 // RepositorySpec defines a repository to poll.
@@ -23,9 +24,6 @@ type RepositorySpec struct {
 	Type      RepoType         `json:"type,omitempty"`
 	Frequency *metav1.Duration `json:"frequency,omitempty"`
 	Pipeline  PipelineRef      `json:"pipelineRef"`
-
-	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
 }
 
 // PipelineRef links to the Pipeline to execute.
@@ -44,9 +42,6 @@ type RepositoryStatus struct {
 	LastError          string `json:"lastError,omitempty"`
 	PollStatus         `json:"pollStatus,omitempty"`
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
-
-	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
 }
 
 // PollStatus represents the last polled state of the repo.
