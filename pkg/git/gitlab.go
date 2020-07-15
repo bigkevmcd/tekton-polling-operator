@@ -20,8 +20,11 @@ type GitLabPoller struct {
 }
 
 // NewGitLabPoller creates a new GitLab poller.
-func NewGitLabPoller(c *http.Client, authToken string) *GitLabPoller {
-	return &GitLabPoller{client: c, endpoint: "https://gitlab.com", authToken: authToken}
+func NewGitLabPoller(c *http.Client, endpoint, authToken string) *GitLabPoller {
+	if endpoint == "" {
+		endpoint = "https://gitlab.com"
+	}
+	return &GitLabPoller{client: c, endpoint: endpoint, authToken: authToken}
 }
 
 func (g GitLabPoller) Poll(repo string, pr pollingv1.PollStatus) (pollingv1.PollStatus, error) {

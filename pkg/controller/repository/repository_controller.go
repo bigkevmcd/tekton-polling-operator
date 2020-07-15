@@ -31,14 +31,14 @@ func Add(mgr manager.Manager) error {
 	return add(mgr, newReconciler(mgr))
 }
 
-type commitPollerFactory func(repo *pollingv1.Repository, authToken string) git.CommitPoller
+type commitPollerFactory func(repo *pollingv1.Repository, endpoint, authToken string) git.CommitPoller
 
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	return &ReconcileRepository{
 		client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
-		pollerFactory: func(repo *pollingv1.Repository, token string) git.CommitPoller {
-			return makeCommitPoller(repo, token)
+		pollerFactory: func(repo *pollingv1.Repository, endpoint, token string) git.CommitPoller {
+			return makeCommitPoller(repo, endpoint, token)
 		},
 		pipelineRunner: pipelines.NewRunner(mgr.GetClient()),
 		secretGetter:   secrets.New(mgr.GetClient()),
@@ -91,7 +91,7 @@ func (r *ReconcileRepository) Reconcile(req reconcile.Request) (reconcile.Result
 		return reconcile.Result{}, err
 	}
 
-	repoName, err := repoFromURL(repo.Spec.URL)
+	repoName, endpoint, err := repoFromURL(repo.Spec.URL)
 	if err != nil {
 		reqLogger.Error(err, "Parsing the repo from the URL failed", "repoURL", repo.Spec.URL)
 		return reconcile.Result{}, err
@@ -104,7 +104,7 @@ func (r *ReconcileRepository) Reconcile(req reconcile.Request) (reconcile.Result
 
 	repo.Status.PollStatus.Ref = repo.Spec.Ref
 	// TODO: handle pollerFactory returning nil/error
-	newStatus, err := r.pollerFactory(repo, authToken).Poll(repoName, repo.Status.PollStatus)
+	newStatus, err := r.pollerFactory(repo, endpoint, authToken).Poll(repoName, repo.Status.PollStatus)
 	if err != nil {
 		repo.Status.LastError = err.Error()
 		reqLogger.Error(err, "Repository poll failed")
@@ -158,23 +158,30 @@ func (r *ReconcileRepository) authTokenForRepo(ctx context.Context, logger logr.
 }
 
 // TODO: create an HTTP client that has appropriate timeouts.
-// What about non-public URLs?
 // TODO: pass the logger through so that we can log out errors from this and
 // also the pipelinerun creator.
-func makeCommitPoller(repo *pollingv1.Repository, authToken string) git.CommitPoller {
+func makeCommitPoller(repo *pollingv1.Repository, endpoint, authToken string) git.CommitPoller {
 	switch repo.Spec.Type {
 	case pollingv1.GitHub:
-		return git.NewGitHubPoller(http.DefaultClient, authToken)
+		if endpoint == "https://github.com" {
+			endpoint = ""
+		}
+		return git.NewGitHubPoller(http.DefaultClient, endpoint, authToken)
 	case pollingv1.GitLab:
-		return git.NewGitLabPoller(http.DefaultClient, authToken)
+		if endpoint == "https://gitlab.com" {
+			endpoint = ""
+		}
+		return git.NewGitLabPoller(http.DefaultClient, endpoint, authToken)
 	}
 	return nil
 }
 
-func repoFromURL(s string) (string, error) {
+func repoFromURL(s string) (string, string, error) {
 	parsed, err := url.Parse(s)
 	if err != nil {
-		return "", fmt.Errorf("failed to parse repo from URL %#v: %s", s, err)
+		return "", "", fmt.Errorf("failed to parse repo from URL %#v: %s", s, err)
 	}
-	return strings.TrimPrefix(strings.TrimSuffix(parsed.Path, ".git"), "/"), nil
+
+	endpoint := fmt.Sprintf("%s://%s", parsed.Scheme, parsed.Host)
+	return strings.TrimPrefix(strings.TrimSuffix(parsed.Path, ".git"), "/"), endpoint, nil
 }

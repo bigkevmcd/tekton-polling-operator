@@ -101,7 +101,7 @@ func TestReconcileRepositoryWithAuthSecret(t *testing.T) {
 		repo := makeRepository()
 		repo.Spec.Auth = &tt.authSecret
 		_, r := makeReconciler(t, repo, repo, makeTestSecret(testSecretName, tt.secretKey))
-		r.pollerFactory = func(_ *pollingv1.Repository, token string) git.CommitPoller {
+		r.pollerFactory = func(_ *pollingv1.Repository, endpoint, token string) git.CommitPoller {
 			if token != testAuthToken {
 				t.Fatal("required auth token not provided")
 			}
@@ -125,7 +125,7 @@ func TestReconcileRepositoryErrorPolling(t *testing.T) {
 	req := makeReconcileRequest()
 	ctx := context.Background()
 	failingErr := errors.New("failing")
-	r.pollerFactory = func(*pollingv1.Repository, string) git.CommitPoller {
+	r.pollerFactory = func(*pollingv1.Repository, string, string) git.CommitPoller {
 		p := git.NewMockPoller()
 		p.FailWithError(failingErr)
 		return p
@@ -172,7 +172,7 @@ func TestReconcileRepositoryClearsLastErrorOnSuccessfulPoll(t *testing.T) {
 	cl, r := makeReconciler(t, repo, repo)
 	failingErr := errors.New("failing")
 	savedFactory := r.pollerFactory
-	r.pollerFactory = func(*pollingv1.Repository, string) git.CommitPoller {
+	r.pollerFactory = func(*pollingv1.Repository, string, string) git.CommitPoller {
 		p := git.NewMockPoller()
 		p.FailWithError(failingErr)
 		return p
@@ -247,7 +247,7 @@ func makeReconciler(t *testing.T, pr *pollingv1.Repository, objs ...runtime.Obje
 	p.AddMockResponse(testRepo, pollingv1.PollStatus{Ref: testRef},
 		pollingv1.PollStatus{Ref: testRef, SHA: testCommitSHA,
 			ETag: testCommitETag})
-	pollerFactory := func(*pollingv1.Repository, string) git.CommitPoller {
+	pollerFactory := func(*pollingv1.Repository, string, string) git.CommitPoller {
 		return p
 	}
 	return cl, &ReconcileRepository{

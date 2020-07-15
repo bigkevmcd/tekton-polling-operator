@@ -24,8 +24,11 @@ const (
 )
 
 // NewGitHubPoller creates a new GitHub poller.
-func NewGitHubPoller(c *http.Client, authToken string) *GitHubPoller {
-	return &GitHubPoller{client: c, endpoint: "https://api.github.com", authToken: authToken}
+func NewGitHubPoller(c *http.Client, endpoint, authToken string) *GitHubPoller {
+	if endpoint == "" {
+		endpoint = "https://api.github.com"
+	}
+	return &GitHubPoller{client: c, endpoint: endpoint, authToken: authToken}
 }
 
 func (g GitHubPoller) Poll(repo string, pr pollingv1.PollStatus) (pollingv1.PollStatus, error) {
