@@ -62,6 +62,7 @@ spec:
   url: https://github.com/my-org/my-repo.git
   ref: main
   frequency: 5m
+  type: github
   pipelineRef:
     name: github-poll-pipeline
 ```
@@ -69,6 +70,8 @@ spec:
 This defines a repository that monitors the `main` branch in
 `https://github.com/my-org/my-repo.git`, checking every 5 minutes, and executing
 the `github-poll-pipeline` when a change is detected.
+
+You can also monitor `GitLab` repositories, specifying the type as `gitlab`.
 
 ## Authenticating against a Private Repository
 
