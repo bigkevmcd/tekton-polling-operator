@@ -1,0 +1,10 @@
+domain: tekton.dev
+layout: go.kubebuilder.io/v2.0.0
+repo: github.com/bigkevmcd/tekton-polling-operator
+resources:
+- group: polling
+  kind: Repository
+  version: v1alpha1
+version: 3-alpha
+plugins:
+  go.operator-sdk.io/v2.0.0: {}

@@ -1,0 +1,7 @@
+apiVersion: polling.tekton.dev/v1alpha1
+kind: Repository
+metadata:
+  name: repository-sample
+spec:
+  # Add fields here
+  foo: bar

@@ -1,0 +1,24 @@
+# permissions for end users to edit repositories.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: repository-editor-role
+rules:
+- apiGroups:
+  - polling.tekton.dev
+  resources:
+  - repositories
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - polling.tekton.dev
+  resources:
+  - repositories/status
+  verbs:
+  - get

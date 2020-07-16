@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"path"
 
-	pollingv1 "github.com/bigkevmcd/tekton-polling-operator/pkg/apis/polling/v1alpha1"
+	pollingv1alpha1 "github.com/bigkevmcd/tekton-polling-operator/api/v1alpha1"
 )
 
 // TODO: add logging - especially of the response body.
@@ -31,10 +31,10 @@ func NewGitHubPoller(c *http.Client, endpoint, authToken string) *GitHubPoller {
 	return &GitHubPoller{client: c, endpoint: endpoint, authToken: authToken}
 }
 
-func (g GitHubPoller) Poll(repo string, pr pollingv1.PollStatus) (pollingv1.PollStatus, error) {
+func (g GitHubPoller) Poll(repo string, pr pollingv1alpha1.PollStatus) (pollingv1alpha1.PollStatus, error) {
 	requestURL, err := makeGitHubURL(g.endpoint, repo, pr.Ref)
 	if err != nil {
-		return pollingv1.PollStatus{}, fmt.Errorf("failed to make the request URL: %w", err)
+		return pollingv1alpha1.PollStatus{}, fmt.Errorf("failed to make the request URL: %w", err)
 	}
 	req, err := http.NewRequest("GET", requestURL, nil)
 	if pr.ETag != "" {
@@ -46,12 +46,12 @@ func (g GitHubPoller) Poll(repo string, pr pollingv1.PollStatus) (pollingv1.Poll
 	}
 	resp, err := g.client.Do(req)
 	if err != nil {
-		return pollingv1.PollStatus{}, fmt.Errorf("failed to get current commit: %v", err)
+		return pollingv1alpha1.PollStatus{}, fmt.Errorf("failed to get current commit: %v", err)
 	}
 	// TODO: Return an error type that we can identify as a NotFound, likely
 	// this is either a security token issue, or an unknown repo.
 	if resp.StatusCode >= http.StatusBadRequest {
-		return pollingv1.PollStatus{}, fmt.Errorf("server error: %d", resp.StatusCode)
+		return pollingv1alpha1.PollStatus{}, fmt.Errorf("server error: %d", resp.StatusCode)
 	}
 	if resp.StatusCode == http.StatusNotModified {
 		return pr, nil
@@ -62,9 +62,9 @@ func (g GitHubPoller) Poll(repo string, pr pollingv1.PollStatus) (pollingv1.Poll
 	var gc githubCommit
 	err = json.Unmarshal(body, &gc)
 	if err != nil {
-		return pollingv1.PollStatus{}, fmt.Errorf("failed to decode response body: %w", err)
+		return pollingv1alpha1.PollStatus{}, fmt.Errorf("failed to decode response body: %w", err)
 	}
-	return pollingv1.PollStatus{Ref: pr.Ref, SHA: gc.SHA, ETag: resp.Header.Get("ETag")}, nil
+	return pollingv1alpha1.PollStatus{Ref: pr.Ref, SHA: gc.SHA, ETag: resp.Header.Get("ETag")}, nil
 }
 
 func makeGitHubURL(endpoint, repo, ref string) (string, error) {

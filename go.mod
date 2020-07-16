@@ -1,13 +1,14 @@
 module github.com/bigkevmcd/tekton-polling-operator
 
-go 1.14
+go 1.13
 
 require (
 	github.com/go-logr/logr v0.1.0
 	github.com/google/go-cmp v0.4.1
+	github.com/onsi/ginkgo v1.11.0
+	github.com/onsi/gomega v1.8.1
 	github.com/operator-framework/operator-sdk v0.17.1
-	github.com/spf13/pflag v1.0.5
-	github.com/tektoncd/pipeline v0.14.0
+	github.com/tektoncd/pipeline v0.14.1
 	k8s.io/api v0.18.2
 	k8s.io/apimachinery v0.18.2
 	k8s.io/client-go v12.0.0+incompatible
@@ -26,6 +27,7 @@ replace (
 // Pin k8s deps to 1.16.5
 replace (
 	k8s.io/api => k8s.io/api v0.16.5
+	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.16.5
 	k8s.io/apimachinery => k8s.io/apimachinery v0.16.5
 	k8s.io/client-go => k8s.io/client-go v0.16.5
 	k8s.io/code-generator => k8s.io/code-generator v0.16.5

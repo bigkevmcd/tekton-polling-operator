@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	pollingv1alpha1 "github.com/bigkevmcd/tekton-polling-operator/pkg/apis/polling/v1alpha1"
+	pollingv1alpha1 "github.com/bigkevmcd/tekton-polling-operator/api/v1alpha1"
 )
 
 const testToken = "test12345"

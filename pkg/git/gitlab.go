@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	pollingv1 "github.com/bigkevmcd/tekton-polling-operator/pkg/apis/polling/v1alpha1"
+	pollingv1alpha1 "github.com/bigkevmcd/tekton-polling-operator/api/v1alpha1"
 )
 
 // TODO: add logging - especially of the response body.
@@ -27,7 +27,7 @@ func NewGitLabPoller(c *http.Client, endpoint, authToken string) *GitLabPoller {
 	return &GitLabPoller{client: c, endpoint: endpoint, authToken: authToken}
 }
 
-func (g GitLabPoller) Poll(repo string, pr pollingv1.PollStatus) (pollingv1.PollStatus, error) {
+func (g GitLabPoller) Poll(repo string, pr pollingv1alpha1.PollStatus) (pollingv1alpha1.PollStatus, error) {
 	requestURL := makeGitLabURL(g.endpoint, repo, pr.Ref)
 	req, err := http.NewRequest("GET", requestURL, nil)
 	if pr.ETag != "" {
@@ -39,12 +39,12 @@ func (g GitLabPoller) Poll(repo string, pr pollingv1.PollStatus) (pollingv1.Poll
 	}
 	resp, err := g.client.Do(req)
 	if err != nil {
-		return pollingv1.PollStatus{}, fmt.Errorf("failed to get current commit: %v", err)
+		return pollingv1alpha1.PollStatus{}, fmt.Errorf("failed to get current commit: %v", err)
 	}
 	// TODO: Return an error type that we can identify as a NotFound, likely
 	// this is either a security token issue, or an unknown repo.
 	if resp.StatusCode >= http.StatusBadRequest {
-		return pollingv1.PollStatus{}, fmt.Errorf("server error: %d", resp.StatusCode)
+		return pollingv1alpha1.PollStatus{}, fmt.Errorf("server error: %d", resp.StatusCode)
 	}
 	if resp.StatusCode == http.StatusNotModified {
 		return pr, nil
@@ -55,9 +55,9 @@ func (g GitLabPoller) Poll(repo string, pr pollingv1.PollStatus) (pollingv1.Poll
 	var gc []gitlabCommit
 	err = json.Unmarshal(body, &gc)
 	if err != nil {
-		return pollingv1.PollStatus{}, fmt.Errorf("failed to decode response body: %w", err)
+		return pollingv1alpha1.PollStatus{}, fmt.Errorf("failed to decode response body: %w", err)
 	}
-	return pollingv1.PollStatus{Ref: pr.Ref, SHA: gc[0].ID, ETag: resp.Header.Get("ETag")}, nil
+	return pollingv1alpha1.PollStatus{Ref: pr.Ref, SHA: gc[0].ID, ETag: resp.Header.Get("ETag")}, nil
 }
 
 func makeGitLabURL(endpoint, repo, ref string) string {
