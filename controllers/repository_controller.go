@@ -53,7 +53,8 @@ type RepositoryReconciler struct {
 
 // +kubebuilder:rbac:groups=polling.tekton.dev,resources=repositories,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=polling.tekton.dev,resources=repositories/status,verbs=get;update;patch
-
+// +kubebuilder:rbac:groups=tekton.dev,resources=pipelineruns,verbs=create
+// +kubebuilder:rbac:groups="",resources=secrets,verbs=get
 func (r *RepositoryReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	reqLogger := r.Log.WithValues("repository", req.NamespacedName)
