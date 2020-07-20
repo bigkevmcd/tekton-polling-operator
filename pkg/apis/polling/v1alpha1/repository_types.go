@@ -28,7 +28,8 @@ type RepositorySpec struct {
 
 // PipelineRef links to the Pipeline to execute.
 type PipelineRef struct {
-	Name string `json:"name"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace,omitempty"`
 }
 
 // AuthSecret references a secret for authenticating the request.

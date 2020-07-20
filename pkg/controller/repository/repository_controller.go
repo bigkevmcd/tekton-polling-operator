@@ -131,7 +131,12 @@ func (r *ReconcileRepository) Reconcile(req reconcile.Request) (reconcile.Result
 		reqLogger.Error(err, "unable to update Repository status")
 		return reconcile.Result{}, err
 	}
-	pr, err := r.pipelineRunner.Run(ctx, repo.Spec.Pipeline.Name, repo.Spec.URL, repo.Status.PollStatus.SHA)
+	runNS := repo.Spec.Pipeline.Namespace
+	if runNS == "" {
+		runNS = req.Namespace
+	}
+
+	pr, err := r.pipelineRunner.Run(ctx, repo.Spec.Pipeline.Name, runNS, repo.Spec.URL, repo.Status.PollStatus.SHA)
 	if err != nil {
 		reqLogger.Error(err, "failed to create a PipelineRun", "pipelineName", repo.Spec.Pipeline.Name)
 		return reconcile.Result{}, err

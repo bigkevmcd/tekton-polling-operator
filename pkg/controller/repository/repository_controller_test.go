@@ -58,7 +58,47 @@ func TestReconcileRepositoryWithEmptyPollState(t *testing.T) {
 	loaded := &pollingv1.Repository{}
 	err = cl.Get(ctx, req.NamespacedName, loaded)
 	fatalIfError(t, err)
-	r.pipelineRunner.(*pipelines.MockRunner).AssertPipelineRun(testPipelineName, testRepoURL, testCommitSHA)
+	r.pipelineRunner.(*pipelines.MockRunner).AssertPipelineRun(
+		testPipelineName, testRepositoryNamespace,
+		testRepoURL, testCommitSHA)
+
+	wantStatus := pollingv1.RepositoryStatus{
+		PollStatus: pollingv1.PollStatus{
+			Ref:  "main",
+			SHA:  "24317a55785cd98d6c9bf50a5204bc6be17e7316",
+			ETag: `W/"878f43039ad0553d0d3122d8bc171b01"`,
+		},
+	}
+	if diff := cmp.Diff(wantStatus, loaded.Status); diff != "" {
+		t.Fatalf("incorrect repository status:\n%s", diff)
+	}
+}
+
+func TestReconcileRepositoryInPipelineNamespace(t *testing.T) {
+	pipelineNS := "test-pipeline-ns"
+	logf.SetLogger(logf.ZapLogger(true))
+	repo := makeRepository(func(r *pollingv1.Repository) {
+		r.Spec.Pipeline.Namespace = pipelineNS
+	})
+	cl, r := makeReconciler(t, repo, repo)
+	req := makeReconcileRequest()
+	ctx := context.Background()
+
+	res, err := r.Reconcile(req)
+	fatalIfError(t, err)
+	wantResult := reconcile.Result{
+		RequeueAfter: time.Second * 10,
+	}
+	if diff := cmp.Diff(wantResult, res); diff != "" {
+		t.Fatalf("reconciliation result is different:\n%s", diff)
+	}
+
+	loaded := &pollingv1.Repository{}
+	err = cl.Get(ctx, req.NamespacedName, loaded)
+	fatalIfError(t, err)
+	r.pipelineRunner.(*pipelines.MockRunner).AssertPipelineRun(
+		testPipelineName, pipelineNS,
+		testRepoURL, testCommitSHA)
 
 	wantStatus := pollingv1.RepositoryStatus{
 		PollStatus: pollingv1.PollStatus{
@@ -147,7 +187,9 @@ func TestReconcileRepositoryErrorPolling(t *testing.T) {
 	if diff := cmp.Diff(wantStatus, loaded.Status); diff != "" {
 		t.Fatalf("incorrect repository status:\n%s", diff)
 	}
-	r.pipelineRunner.(*pipelines.MockRunner).RefutePipelineRun(testPipelineName, testRepoURL, testCommitSHA)
+	r.pipelineRunner.(*pipelines.MockRunner).RefutePipelineRun(
+		testPipelineName, testRepositoryNamespace,
+		testRepoURL, testCommitSHA)
 }
 
 func TestReconcileRepositoryWithUnchangedState(t *testing.T) {
@@ -162,7 +204,9 @@ func TestReconcileRepositoryWithUnchangedState(t *testing.T) {
 	_, err = r.Reconcile(req)
 
 	fatalIfError(t, err)
-	r.pipelineRunner.(*pipelines.MockRunner).RefutePipelineRun(testPipelineName, testRepoURL, testCommitSHA)
+	r.pipelineRunner.(*pipelines.MockRunner).RefutePipelineRun(
+		testPipelineName, testRepositoryNamespace,
+		testRepoURL, testCommitSHA)
 }
 
 func TestReconcileRepositoryClearsLastErrorOnSuccessfulPoll(t *testing.T) {
@@ -197,8 +241,8 @@ func TestReconcileRepositoryClearsLastErrorOnSuccessfulPoll(t *testing.T) {
 	fatalIfError(t, cl.Get(ctx, req.NamespacedName, loaded))
 }
 
-func makeRepository() *pollingv1.Repository {
-	return &pollingv1.Repository{
+func makeRepository(opts ...func(*pollingv1.Repository)) *pollingv1.Repository {
+	r := &pollingv1.Repository{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      testRepositoryName,
 			Namespace: testRepositoryNamespace,
@@ -212,6 +256,10 @@ func makeRepository() *pollingv1.Repository {
 		},
 		Status: pollingv1.RepositoryStatus{},
 	}
+	for _, o := range opts {
+		o(r)
+	}
+	return r
 }
 
 func makeReconcileRequest() reconcile.Request {

@@ -21,17 +21,17 @@ type MockRunner struct {
 }
 
 // Run is an implementation of the PipelineRunner interface.
-func (m *MockRunner) Run(ctx context.Context, pipelineName, repoURL, sha string) (*pipelinev1.PipelineRun, error) {
+func (m *MockRunner) Run(ctx context.Context, pipelineName, ns, repoURL, sha string) (*pipelinev1.PipelineRun, error) {
 	if m.runError != nil {
 		return nil, m.runError
 	}
-	m.runs[mockKey(pipelineName, repoURL)] = sha
+	m.runs[mockKey(pipelineName, ns, repoURL)] = sha
 	return &pipelinev1.PipelineRun{}, nil
 }
 
 // AssertPipelineRun ensures that the pipeline run was triggered.
-func (m *MockRunner) AssertPipelineRun(pipelineName, repoURL, wantSHA string) {
-	sha, ok := m.runs[mockKey(pipelineName, repoURL)]
+func (m *MockRunner) AssertPipelineRun(pipelineName, ns, repoURL, wantSHA string) {
+	sha, ok := m.runs[mockKey(pipelineName, ns, repoURL)]
 	if !ok {
 		m.t.Fatalf("no pipeline run for %s / %s", pipelineName, repoURL)
 	}
@@ -41,8 +41,8 @@ func (m *MockRunner) AssertPipelineRun(pipelineName, repoURL, wantSHA string) {
 }
 
 // RefutePipelineRun ensures that the pipeline run was triggered.
-func (m *MockRunner) RefutePipelineRun(pipelineName, repoURL, wantSHA string) {
-	sha := m.runs[mockKey(pipelineName, repoURL)]
+func (m *MockRunner) RefutePipelineRun(pipelineName, ns, repoURL, wantSHA string) {
+	sha := m.runs[mockKey(pipelineName, ns, repoURL)]
 	if sha == wantSHA {
 		m.t.Fatalf("pipeline run with SHA %#v was run", wantSHA)
 	}
@@ -53,6 +53,6 @@ func (m *MockRunner) FailWithError(err error) {
 	m.runError = err
 }
 
-func mockKey(pipelineName, repoURL string) string {
+func mockKey(pipelineName, ns, repoURL string) string {
 	return strings.Join([]string{pipelineName, repoURL}, ":")
 }

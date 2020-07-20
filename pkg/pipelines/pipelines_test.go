@@ -21,19 +21,21 @@ const (
 	testNamespace    = "test-namespace"
 )
 
+var _ PipelineRunner = (*ClientPipelineRunner)(nil)
+
 func TestRunPipelineCreatesPipelineRun(t *testing.T) {
 	s := scheme.Scheme
 	s.AddKnownTypes(pipelinev1.SchemeGroupVersion, &pipelinev1.PipelineRun{})
 	cl := fake.NewFakeClient()
 	r := NewRunner(cl)
-	r.objectMeta = func() metav1.ObjectMeta {
+	r.objectMeta = func(ns string) metav1.ObjectMeta {
 		return metav1.ObjectMeta{
 			Name:      testPipelineRun,
-			Namespace: testNamespace,
+			Namespace: ns,
 		}
 	}
 
-	_, err := r.Run(context.Background(), testPipelineName, testRepoURL, testSHA)
+	_, err := r.Run(context.Background(), testPipelineName, testNamespace, testRepoURL, testSHA)
 
 	pr := &pipelinev1.PipelineRun{}
 	err = cl.Get(context.Background(), types.NamespacedName{Namespace: testNamespace, Name: testPipelineRun}, pr)

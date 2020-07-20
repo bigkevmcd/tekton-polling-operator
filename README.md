@@ -62,9 +62,10 @@ spec:
   url: https://github.com/my-org/my-repo.git
   ref: main
   frequency: 5m
-  type: github
+  type: github # can also be gitlab
   pipelineRef:
     name: github-poll-pipeline
+    namespace: test-ns # optional: if provided, the pipelinerun will be created in this namespace to reference the pipeline.
 ```
 
 This defines a repository that monitors the `main` branch in

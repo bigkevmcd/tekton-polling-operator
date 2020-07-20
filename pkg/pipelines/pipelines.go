@@ -25,12 +25,12 @@ func NewRunner(c client.Client) *ClientPipelineRunner {
 // ClientPipelineRunner uses a split client to run pipelines.
 type ClientPipelineRunner struct {
 	client     client.Client
-	objectMeta func() metav1.ObjectMeta
+	objectMeta func(string) metav1.ObjectMeta
 }
 
 // Run is an implementation of the PipelineRunner interface.
-func (c *ClientPipelineRunner) Run(ctx context.Context, pipelineName, repoURL, sha string) (*pipelinev1.PipelineRun, error) {
-	pr := c.makePipelineRun(pipelineName, repoURL, sha)
+func (c *ClientPipelineRunner) Run(ctx context.Context, pipelineName, ns, repoURL, sha string) (*pipelinev1.PipelineRun, error) {
+	pr := c.makePipelineRun(pipelineName, ns, repoURL, sha)
 	err := c.client.Create(ctx, pr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a pipeline run for pipeline %s: %w", pipelineName, err)
@@ -38,10 +38,10 @@ func (c *ClientPipelineRunner) Run(ctx context.Context, pipelineName, repoURL, s
 	return pr, nil
 }
 
-func (c *ClientPipelineRunner) makePipelineRun(pipelineName, repoURL, sha string) *pipelinev1.PipelineRun {
+func (c *ClientPipelineRunner) makePipelineRun(pipelineName, ns, repoURL, sha string) *pipelinev1.PipelineRun {
 	return &pipelinev1.PipelineRun{
 		TypeMeta:   pipelineRunMeta,
-		ObjectMeta: c.objectMeta(),
+		ObjectMeta: c.objectMeta(ns),
 		Spec: pipelinev1.PipelineRunSpec{
 			PipelineRef: &pipelinev1.PipelineRef{Name: pipelineName},
 			Params: []pipelinev1.Param{
@@ -54,9 +54,9 @@ func (c *ClientPipelineRunner) makePipelineRun(pipelineName, repoURL, sha string
 
 // This is here because the controller-runtime fake client doesn't generate
 // names...
-func objectMetaCreator() metav1.ObjectMeta {
+func objectMetaCreator(ns string) metav1.ObjectMeta {
 	return metav1.ObjectMeta{
 		GenerateName: pipelineRunNames,
-		Namespace:    "default",
+		Namespace:    ns,
 	}
 }
