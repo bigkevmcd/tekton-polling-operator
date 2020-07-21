@@ -105,3 +105,8 @@ spec:
 
 This will fetch the secret, and get the value in `token` and use that to
 authenticate the API call to GitHub.
+
+## Creating PipelineRuns in other namespaces
+
+See the documentation [here](docs/configuring_security.md) for how to grant
+access for the operator to create pipelineruns in different namespaces.
