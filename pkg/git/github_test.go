@@ -39,7 +39,7 @@ func TestGitHubWithUnknownETag(t *testing.T) {
 	g := NewGitHubPoller(as.Client(), as.URL, testToken)
 	g.endpoint = as.URL
 
-	polled, err := g.Poll("testing/repo", pollingv1alpha1.PollStatus{Ref: "master"})
+	polled, body, err := g.Poll("testing/repo", pollingv1alpha1.PollStatus{Ref: "master"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,6 +50,9 @@ func TestGitHubWithUnknownETag(t *testing.T) {
 	if polled.SHA != "7638417db6d59f3c431d3e1f261cc637155684cd" {
 		t.Errorf("Poll() SHA got %s, want %s", polled.SHA, "7638417db6d59f3c431d3e1f261cc637155684cd")
 	}
+	if m := body["message"]; m != "added readme, because im a good github citizen" {
+		t.Fatalf("body doesn't match:\n%s", m)
+	}
 }
 
 func TestGitHubWithKnownTag(t *testing.T) {
@@ -59,13 +62,16 @@ func TestGitHubWithKnownTag(t *testing.T) {
 	g := NewGitHubPoller(as.Client(), as.URL, testToken)
 	g.endpoint = as.URL
 
-	polled, err := g.Poll("testing/repo", pollingv1alpha1.PollStatus{Ref: "master", ETag: etag})
+	polled, body, err := g.Poll("testing/repo", pollingv1alpha1.PollStatus{Ref: "master", ETag: etag})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	if polled.ETag != etag {
 		t.Fatalf("Poll() got %s, want %s", polled.ETag, etag)
+	}
+	if body != nil {
+		t.Fatalf("for unknown tag, got %#v, want nil", body)
 	}
 }
 
@@ -76,7 +82,7 @@ func TestGitHubWithNotFoundResponse(t *testing.T) {
 	g := NewGitHubPoller(as.Client(), as.URL, testToken)
 	g.endpoint = as.URL
 
-	_, err := g.Poll("testing/testing", pollingv1alpha1.PollStatus{Ref: "master", ETag: etag})
+	_, _, err := g.Poll("testing/testing", pollingv1alpha1.PollStatus{Ref: "master", ETag: etag})
 	if err.Error() != "server error: 404" {
 		t.Fatal(err)
 	}
@@ -91,7 +97,7 @@ func TestGitHubWithBadAuthentication(t *testing.T) {
 	g := NewGitHubPoller(as.Client(), as.URL, "anotherToken")
 	g.endpoint = as.URL
 
-	_, err := g.Poll("testing/repo", pollingv1alpha1.PollStatus{Ref: "master", ETag: etag})
+	_, _, err := g.Poll("testing/repo", pollingv1alpha1.PollStatus{Ref: "master", ETag: etag})
 	if err.Error() != "server error: 404" {
 		t.Fatal(err)
 	}
@@ -105,7 +111,7 @@ func TestGitHubWithNoAuthentication(t *testing.T) {
 	g := NewGitHubPoller(as.Client(), as.URL, "")
 	g.endpoint = as.URL
 
-	_, err := g.Poll("testing/repo", pollingv1alpha1.PollStatus{Ref: "master", ETag: etag})
+	_, _, err := g.Poll("testing/repo", pollingv1alpha1.PollStatus{Ref: "master", ETag: etag})
 	if err != nil {
 		t.Fatal(err)
 	}
