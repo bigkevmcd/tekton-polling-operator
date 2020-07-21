@@ -26,26 +26,27 @@ func (m *MockRunner) Run(ctx context.Context, pipelineName, ns string, params []
 	if m.runError != nil {
 		return nil, m.runError
 	}
-	m.runs[mockKey(pipelineName, ns)] = params
+	m.runs[mockKey(ns, pipelineName)] = params
 	return &pipelinev1.PipelineRun{}, nil
 }
 
 // AssertPipelineRun ensures that the pipeline run was triggered.
 func (m *MockRunner) AssertPipelineRun(pipelineName, ns string, want []pipelinev1.Param) {
+	m.t.Helper()
 	params, ok := m.runs[mockKey(ns, pipelineName)]
 	if !ok {
-		m.t.Fatalf("no pipeline run for %s / %s", ns, pipelineName)
+		m.t.Fatalf("no pipeline run for %s/%s", ns, pipelineName)
 	}
 	if diff := cmp.Diff(want, params); diff != "" {
-		m.t.Fatalf("incorrect sha for pipeline run, got %#v, want %#v", params, want)
+		m.t.Fatalf("incorrect params for pipeline run, got %#v, want %#v", params, want)
 	}
 }
 
-// RefutePipelineRun ensures that the pipeline run was not triggered.
-func (m *MockRunner) RefutePipelineRun(pipelineName, ns string, want []pipelinev1.Param) {
-	params := m.runs[mockKey(ns, pipelineName)]
-	if diff := cmp.Diff(want, params); diff == "" {
-		m.t.Fatalf("pipeline run with params %#v was run", want)
+// AssertNoPipelineRuns fails if there were any pipelines executed.
+func (m *MockRunner) AssertNoPipelineRuns() {
+	m.t.Helper()
+	if len(m.runs) != 0 {
+		m.t.Fatalf("pipelines were executed: %#v\n", m.runs)
 	}
 }
 

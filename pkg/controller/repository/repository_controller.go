@@ -18,10 +18,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	pollingv1 "github.com/bigkevmcd/tekton-polling-operator/pkg/apis/polling/v1alpha1"
+	"github.com/bigkevmcd/tekton-polling-operator/pkg/cel"
 	"github.com/bigkevmcd/tekton-polling-operator/pkg/git"
 	"github.com/bigkevmcd/tekton-polling-operator/pkg/pipelines"
 	"github.com/bigkevmcd/tekton-polling-operator/pkg/secrets"
 	"github.com/go-logr/logr"
+	pipelinev1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -104,7 +106,7 @@ func (r *ReconcileRepository) Reconcile(req reconcile.Request) (reconcile.Result
 
 	repo.Status.PollStatus.Ref = repo.Spec.Ref
 	// TODO: handle pollerFactory returning nil/error
-	newStatus, _, err := r.pollerFactory(repo, endpoint, authToken).Poll(repoName, repo.Status.PollStatus)
+	newStatus, commit, err := r.pollerFactory(repo, endpoint, authToken).Poll(repoName, repo.Status.PollStatus)
 	if err != nil {
 		repo.Status.LastError = err.Error()
 		reqLogger.Error(err, "Repository poll failed")
@@ -136,7 +138,12 @@ func (r *ReconcileRepository) Reconcile(req reconcile.Request) (reconcile.Result
 		runNS = req.Namespace
 	}
 
-	pr, err := r.pipelineRunner.Run(ctx, repo.Spec.Pipeline.Name, runNS, repo.Spec.URL, repo.Status.PollStatus.SHA)
+	params, err := makeParams(commit, repo.Spec)
+	if err != nil {
+		reqLogger.Error(err, "failed to parse the parameters")
+		return reconcile.Result{}, err
+	}
+	pr, err := r.pipelineRunner.Run(ctx, repo.Spec.Pipeline.Name, runNS, params)
 	if err != nil {
 		reqLogger.Error(err, "failed to create a PipelineRun", "pipelineName", repo.Spec.Pipeline.Name)
 		return reconcile.Result{}, err
@@ -160,6 +167,22 @@ func (r *ReconcileRepository) authTokenForRepo(ctx context.Context, logger logr.
 		return "", err
 	}
 	return authToken, nil
+}
+
+func makeParams(commit git.Commit, spec pollingv1.RepositorySpec) ([]pipelinev1.Param, error) {
+	celctx, err := cel.New(spec.URL, commit)
+	if err != nil {
+		return nil, err
+	}
+	params := []pipelinev1.Param{}
+	for _, v := range spec.Pipeline.Params {
+		val, err := celctx.EvaluateToParamValue(v.Expression)
+		if err != nil {
+			return nil, err
+		}
+		params = append(params, pipelinev1.Param{Name: v.Name, Value: val})
+	}
+	return params, nil
 }
 
 // TODO: create an HTTP client that has appropriate timeouts.

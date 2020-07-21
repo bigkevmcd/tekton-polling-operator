@@ -60,6 +60,18 @@ spec:
                     type: string
                   namespace:
                     type: string
+                  params:
+                    items:
+                      properties:
+                        expression:
+                          type: string
+                        name:
+                          type: string
+                      required:
+                      - expression
+                      - name
+                      type: object
+                    type: array
                 required:
                 - name
                 type: object

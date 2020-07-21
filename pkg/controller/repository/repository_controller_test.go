@@ -21,6 +21,7 @@ import (
 	"github.com/bigkevmcd/tekton-polling-operator/pkg/pipelines"
 	"github.com/bigkevmcd/tekton-polling-operator/pkg/secrets"
 	"github.com/google/go-cmp/cmp"
+	pipelinev1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 )
 
 const (
@@ -60,7 +61,7 @@ func TestReconcileRepositoryWithEmptyPollState(t *testing.T) {
 	fatalIfError(t, err)
 	r.pipelineRunner.(*pipelines.MockRunner).AssertPipelineRun(
 		testPipelineName, testRepositoryNamespace,
-		testRepoURL, testCommitSHA)
+		makeTestParams(map[string]string{"one": testRepoURL, "two": "main"}))
 
 	wantStatus := pollingv1.RepositoryStatus{
 		PollStatus: pollingv1.PollStatus{
@@ -98,7 +99,7 @@ func TestReconcileRepositoryInPipelineNamespace(t *testing.T) {
 	fatalIfError(t, err)
 	r.pipelineRunner.(*pipelines.MockRunner).AssertPipelineRun(
 		testPipelineName, pipelineNS,
-		testRepoURL, testCommitSHA)
+		makeTestParams(map[string]string{"one": testRepoURL, "two": "main"}))
 
 	wantStatus := pollingv1.RepositoryStatus{
 		PollStatus: pollingv1.PollStatus{
@@ -148,7 +149,7 @@ func TestReconcileRepositoryWithAuthSecret(t *testing.T) {
 			p := git.NewMockPoller()
 			p.AddMockResponse(
 				testRepo, pollingv1.PollStatus{Ref: testRef},
-				map[string]interface{}{"commit": "testRef"},
+				map[string]interface{}{"id": testRef},
 				pollingv1.PollStatus{Ref: testRef, SHA: testCommitSHA,
 					ETag: testCommitETag})
 			return p
@@ -188,15 +189,29 @@ func TestReconcileRepositoryErrorPolling(t *testing.T) {
 	if diff := cmp.Diff(wantStatus, loaded.Status); diff != "" {
 		t.Fatalf("incorrect repository status:\n%s", diff)
 	}
-	r.pipelineRunner.(*pipelines.MockRunner).RefutePipelineRun(
-		testPipelineName, testRepositoryNamespace,
-		testRepoURL, testCommitSHA)
+	r.pipelineRunner.(*pipelines.MockRunner).AssertNoPipelineRuns()
 }
 
 func TestReconcileRepositoryWithUnchangedState(t *testing.T) {
 	logf.SetLogger(logf.ZapLogger(true))
 	repo := makeRepository()
 	_, r := makeReconciler(t, repo, repo)
+	p := git.NewMockPoller()
+	p.AddMockResponse(testRepo, pollingv1.PollStatus{Ref: testRef},
+		map[string]interface{}{"id": testRef},
+		pollingv1.PollStatus{Ref: testRef, SHA: testCommitSHA,
+			ETag: testCommitETag})
+	p.AddMockResponse(
+		testRepo, pollingv1.PollStatus{Ref: testRef, SHA: testCommitSHA,
+			ETag: testCommitETag},
+		nil,
+		pollingv1.PollStatus{Ref: testRef, SHA: testCommitSHA,
+			ETag: testCommitETag})
+
+	r.pollerFactory = func(_ *pollingv1.Repository, endpoint, token string) git.CommitPoller {
+		return p
+	}
+
 	req := makeReconcileRequest()
 	_, err := r.Reconcile(req)
 	fatalIfError(t, err)
@@ -205,9 +220,7 @@ func TestReconcileRepositoryWithUnchangedState(t *testing.T) {
 	_, err = r.Reconcile(req)
 
 	fatalIfError(t, err)
-	r.pipelineRunner.(*pipelines.MockRunner).RefutePipelineRun(
-		testPipelineName, testRepositoryNamespace,
-		testRepoURL, testCommitSHA)
+	r.pipelineRunner.(*pipelines.MockRunner).AssertNoPipelineRuns()
 }
 
 func TestReconcileRepositoryClearsLastErrorOnSuccessfulPoll(t *testing.T) {
@@ -253,7 +266,10 @@ func makeRepository(opts ...func(*pollingv1.Repository)) *pollingv1.Repository {
 			Ref:       testRef,
 			Type:      pollingv1.GitHub,
 			Frequency: &metav1.Duration{Duration: testFrequency},
-			Pipeline:  pollingv1.PipelineRef{Name: testPipelineName},
+			Pipeline: pollingv1.PipelineRef{Name: testPipelineName, Params: []pollingv1.Param{
+				{Name: "one", Expression: "repoURL"},
+				{Name: "two", Expression: "commit.id"},
+			}},
 		},
 		Status: pollingv1.RepositoryStatus{},
 	}
@@ -294,7 +310,7 @@ func makeReconciler(t *testing.T, pr *pollingv1.Repository, objs ...runtime.Obje
 	cl := fake.NewFakeClientWithScheme(s, objs...)
 	p := git.NewMockPoller()
 	p.AddMockResponse(testRepo, pollingv1.PollStatus{Ref: testRef},
-		map[string]interface{}{"commit": "testRef"},
+		map[string]interface{}{"id": testRef},
 		pollingv1.PollStatus{Ref: testRef, SHA: testCommitSHA,
 			ETag: testCommitETag})
 	pollerFactory := func(*pollingv1.Repository, string, string) git.CommitPoller {
@@ -315,4 +331,13 @@ func fatalIfError(t *testing.T, err error) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func makeTestParams(vars map[string]string) []pipelinev1beta1.Param {
+	params := []pipelinev1beta1.Param{}
+	for k, v := range vars {
+		params = append(params, pipelinev1beta1.Param{
+			Name: k, Value: pipelinev1beta1.NewArrayOrString(v)})
+	}
+	return params
 }
