@@ -25,12 +25,12 @@ type Context struct {
 }
 
 // New creates and returns a Context for evaluating expressions.
-func New(repoURL string, context interface{}) (*Context, error) {
+func New(repoURL string, commit interface{}) (*Context, error) {
 	env, err := makeCelEnv()
 	if err != nil {
 		return nil, err
 	}
-	ctx, err := makeEvalContext(repoURL, context)
+	ctx, err := makeEvalContext(repoURL, commit)
 	if err != nil {
 		return nil, err
 	}
@@ -78,19 +78,19 @@ func evaluate(expr string, env *cel.Env, data map[string]interface{}) (ref.Val, 
 func makeCelEnv() (*cel.Env, error) {
 	return cel.NewEnv(
 		cel.Declarations(
-			decls.NewIdent("context", decls.Dyn, nil),
+			decls.NewIdent("commit", decls.Dyn, nil),
 			decls.NewIdent("repoURL", decls.String, nil)))
 }
 
-func makeEvalContext(repoURL string, context interface{}) (map[string]interface{}, error) {
-	m, err := contextToMap(context)
+func makeEvalContext(repoURL string, commit interface{}) (map[string]interface{}, error) {
+	m, err := commitToMap(commit)
 	if err != nil {
 		return nil, err
 	}
-	return map[string]interface{}{"context": m, "repoURL": repoURL}, nil
+	return map[string]interface{}{"commit": m, "repoURL": repoURL}, nil
 }
 
-func contextToMap(v interface{}) (map[string]interface{}, error) {
+func commitToMap(v interface{}) (map[string]interface{}, error) {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return nil, err

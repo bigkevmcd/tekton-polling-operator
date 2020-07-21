@@ -21,9 +21,9 @@ func TestExpressionEvaluation(t *testing.T) {
 	}{
 		{
 			name: "simple body value",
-			expr: "context.commit.id",
+			expr: "commit.ref.id",
 			fixture: map[string]interface{}{
-				"commit": map[string]string{
+				"ref": map[string]string{
 					"id": "testing",
 				},
 			},
@@ -74,7 +74,7 @@ func TestExpressionEvaluation_Error(t *testing.T) {
 	}{
 		{
 			name: "unknown value",
-			expr: "context.Unknown",
+			expr: "commit.Unknown",
 			want: "no such key: Unknown",
 		},
 		{
@@ -118,7 +118,7 @@ func TestContextEvaluateToParamValue(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	result, err := ctx.EvaluateToParamValue("context.push.commits.map(s, s['id'])")
+	result, err := ctx.EvaluateToParamValue("commit.push.commits.map(s, s['id'])")
 	if err != nil {
 		t.Fatal(err)
 	}
