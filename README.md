@@ -15,13 +15,13 @@ This operator requires Tekton Pipelines to be installed first, the installation
 instructions are [here](https://github.com/tektoncd/pipeline/blob/master/docs/install.md).
 
 ```shell
-$ kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/previous/v0.14.0/release.yaml
+$ kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/previous/v0.14.2/release.yaml
 ```
 
 Then you'll need to install the polling-operator.
 
 ```shell
-$ kubectl apply -f https://github.com/bigkevmcd/tekton-polling-operator/releases/download/v0.0.1/release-0.0.1.yaml
+$ kubectl apply -f https://github.com/bigkevmcd/tekton-polling-operator/releases/download/v0.0.3/release-v0.0.3.yaml
 ```
 
 ## Pipelines
