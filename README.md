@@ -2,13 +2,6 @@
 
 A simple git repository poller.
 
-This polls a GitHub repository, and triggers pipeline runs when the SHA of the
-a specific ref changes.
-
-It _does not_ use API tokens to do this, instead it uses the method documented
-[here](https://developer.github.com/changes/2016-02-24-commit-reference-sha-api/)
-and the ETag to fetch the commit.
-
 ## Installation
 
 This operator requires Tekton Pipelines to be installed first, the installation
@@ -23,6 +16,20 @@ Then you'll need to install the polling-operator.
 ```shell
 $ kubectl apply -f https://github.com/bigkevmcd/tekton-polling-operator/releases/download/v0.0.3/release-v0.0.3.yaml
 ```
+
+## GitHub
+
+This polls a GitHub repository, and triggers pipeline runs when the SHA of the
+a specific ref changes.
+
+It _does not_ use API tokens to do this, instead it uses the method documented
+[here](https://developer.github.com/changes/2016-02-24-commit-reference-sha-api/)
+and the ETag to fetch the commit.
+
+## GitLab
+
+This polls a GitLab repository, and triggers pipeline runs when the SHA of the
+a specific ref changes.
 
 ## Pipelines
 
