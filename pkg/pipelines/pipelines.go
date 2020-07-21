@@ -29,8 +29,8 @@ type ClientPipelineRunner struct {
 }
 
 // Run is an implementation of the PipelineRunner interface.
-func (c *ClientPipelineRunner) Run(ctx context.Context, pipelineName, ns, repoURL, sha string) (*pipelinev1.PipelineRun, error) {
-	pr := c.makePipelineRun(pipelineName, ns, repoURL, sha)
+func (c *ClientPipelineRunner) Run(ctx context.Context, pipelineName, ns string, params []pipelinev1.Param) (*pipelinev1.PipelineRun, error) {
+	pr := c.makePipelineRun(pipelineName, ns, params)
 	err := c.client.Create(ctx, pr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a pipeline run for pipeline %s: %w", pipelineName, err)
@@ -38,16 +38,13 @@ func (c *ClientPipelineRunner) Run(ctx context.Context, pipelineName, ns, repoUR
 	return pr, nil
 }
 
-func (c *ClientPipelineRunner) makePipelineRun(pipelineName, ns, repoURL, sha string) *pipelinev1.PipelineRun {
+func (c *ClientPipelineRunner) makePipelineRun(pipelineName, ns string, params []pipelinev1.Param) *pipelinev1.PipelineRun {
 	return &pipelinev1.PipelineRun{
 		TypeMeta:   pipelineRunMeta,
 		ObjectMeta: c.objectMeta(ns),
 		Spec: pipelinev1.PipelineRunSpec{
 			PipelineRef: &pipelinev1.PipelineRef{Name: pipelineName},
-			Params: []pipelinev1.Param{
-				{Name: "sha", Value: pipelinev1.NewArrayOrString(sha)},
-				{Name: "repoURL", Value: pipelinev1.NewArrayOrString(repoURL)},
-			},
+			Params:      params,
 		},
 	}
 }

@@ -35,7 +35,10 @@ func TestRunPipelineCreatesPipelineRun(t *testing.T) {
 		}
 	}
 
-	_, err := r.Run(context.Background(), testPipelineName, testNamespace, testRepoURL, testSHA)
+	params := []pipelinev1.Param{
+		{Name: "test", Value: pipelinev1.NewArrayOrString("value")},
+	}
+	_, err := r.Run(context.Background(), testPipelineName, testNamespace, params)
 
 	pr := &pipelinev1.PipelineRun{}
 	err = cl.Get(context.Background(), types.NamespacedName{Namespace: testNamespace, Name: testPipelineRun}, pr)
@@ -51,10 +54,7 @@ func TestRunPipelineCreatesPipelineRun(t *testing.T) {
 			ResourceVersion: "1",
 		},
 		Spec: pipelinev1.PipelineRunSpec{
-			Params: []pipelinev1.Param{
-				{Name: "sha", Value: pipelinev1.NewArrayOrString(testSHA)},
-				{Name: "repoURL", Value: pipelinev1.NewArrayOrString(testRepoURL)},
-			},
+			Params:      params,
 			PipelineRef: &pipelinev1.PipelineRef{Name: testPipelineName},
 		},
 	}
