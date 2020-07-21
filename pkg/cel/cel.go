@@ -25,12 +25,12 @@ type Context struct {
 }
 
 // New creates and returns a Context for evaluating expressions.
-func New(context interface{}) (*Context, error) {
+func New(repoURL string, context interface{}) (*Context, error) {
 	env, err := makeCelEnv()
 	if err != nil {
 		return nil, err
 	}
-	ctx, err := makeEvalContext(context)
+	ctx, err := makeEvalContext(repoURL, context)
 	if err != nil {
 		return nil, err
 	}
@@ -78,15 +78,16 @@ func evaluate(expr string, env *cel.Env, data map[string]interface{}) (ref.Val, 
 func makeCelEnv() (*cel.Env, error) {
 	return cel.NewEnv(
 		cel.Declarations(
-			decls.NewIdent("context", decls.Dyn, nil)))
+			decls.NewIdent("context", decls.Dyn, nil),
+			decls.NewIdent("repoURL", decls.String, nil)))
 }
 
-func makeEvalContext(context interface{}) (map[string]interface{}, error) {
+func makeEvalContext(repoURL string, context interface{}) (map[string]interface{}, error) {
 	m, err := contextToMap(context)
 	if err != nil {
 		return nil, err
 	}
-	return map[string]interface{}{"context": m}, nil
+	return map[string]interface{}{"context": m, "repoURL": repoURL}, nil
 }
 
 func contextToMap(v interface{}) (map[string]interface{}, error) {

@@ -10,6 +10,8 @@ import (
 	pipelinev1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 )
 
+const testRepoURL = "https://example.com/example/example.git"
+
 func TestExpressionEvaluation(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -27,6 +29,12 @@ func TestExpressionEvaluation(t *testing.T) {
 			},
 			want: types.String("testing"),
 		},
+		{
+			name:    "repoURL",
+			expr:    "repoURL",
+			fixture: map[string]interface{}{},
+			want:    types.String(testRepoURL),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(rt *testing.T) {
@@ -35,7 +43,7 @@ func TestExpressionEvaluation(t *testing.T) {
 				rt.Errorf("failed to make env: %s", err)
 				return
 			}
-			ectx, err := makeEvalContext(tt.fixture)
+			ectx, err := makeEvalContext(testRepoURL, tt.fixture)
 			if err != nil {
 				rt.Errorf("failed to make eval context %s", err)
 				return
@@ -82,7 +90,7 @@ func TestExpressionEvaluation_Error(t *testing.T) {
 				rt.Errorf("failed to make env: %s", err)
 				return
 			}
-			ectx, err := makeEvalContext(map[string]string{"this": "tests"})
+			ectx, err := makeEvalContext(testRepoURL, map[string]string{"this": "tests"})
 			if err != nil {
 				rt.Errorf("failed to make eval context %s", err)
 				return
@@ -106,7 +114,7 @@ func TestContextEvaluateToParamValue(t *testing.T) {
 		"head": "test-value",
 	}
 
-	ctx, err := New(v)
+	ctx, err := New(testRepoURL, v)
 	if err != nil {
 		t.Fatal(err)
 	}
