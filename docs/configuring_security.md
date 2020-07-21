@@ -44,3 +44,9 @@ subjects:
   name: tekton-polling-operator
   namespace: # insert the namespace you deployed the operator in
 ```
+
+Alternatively you can create them via kubectl:
+
+```shell
+$ kubectl create rolebinding <name for this rolebinding> --clusterrole=polling-operator-cluster-role --serviceaccount=<insert deployed namespace>:tekton-polling-operator --namespace=<insert namespace you want to grant access to>
+```
