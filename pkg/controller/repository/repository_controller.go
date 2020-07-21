@@ -104,7 +104,7 @@ func (r *ReconcileRepository) Reconcile(req reconcile.Request) (reconcile.Result
 
 	repo.Status.PollStatus.Ref = repo.Spec.Ref
 	// TODO: handle pollerFactory returning nil/error
-	newStatus, err := r.pollerFactory(repo, endpoint, authToken).Poll(repoName, repo.Status.PollStatus)
+	newStatus, _, err := r.pollerFactory(repo, endpoint, authToken).Poll(repoName, repo.Status.PollStatus)
 	if err != nil {
 		repo.Status.LastError = err.Error()
 		reqLogger.Error(err, "Repository poll failed")

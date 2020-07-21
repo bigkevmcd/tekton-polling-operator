@@ -148,6 +148,7 @@ func TestReconcileRepositoryWithAuthSecret(t *testing.T) {
 			p := git.NewMockPoller()
 			p.AddMockResponse(
 				testRepo, pollingv1.PollStatus{Ref: testRef},
+				map[string]interface{}{"commit": "testRef"},
 				pollingv1.PollStatus{Ref: testRef, SHA: testCommitSHA,
 					ETag: testCommitETag})
 			return p
@@ -293,6 +294,7 @@ func makeReconciler(t *testing.T, pr *pollingv1.Repository, objs ...runtime.Obje
 	cl := fake.NewFakeClientWithScheme(s, objs...)
 	p := git.NewMockPoller()
 	p.AddMockResponse(testRepo, pollingv1.PollStatus{Ref: testRef},
+		map[string]interface{}{"commit": "testRef"},
 		pollingv1.PollStatus{Ref: testRef, SHA: testCommitSHA,
 			ETag: testCommitETag})
 	pollerFactory := func(*pollingv1.Repository, string, string) git.CommitPoller {
