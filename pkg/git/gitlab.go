@@ -57,12 +57,13 @@ func (g GitLabPoller) Poll(repo string, pr pollingv1.PollStatus) (pollingv1.Poll
 	if err != nil {
 		return pollingv1.PollStatus{}, nil, fmt.Errorf("failed to decode response body: %w", err)
 	}
-	return pollingv1.PollStatus{Ref: pr.Ref, SHA: gc[0]["id"].(string), ETag: resp.Header.Get("ETag")}, gc[0], nil
+	commit := gc[0]
+	return pollingv1.PollStatus{Ref: pr.Ref, SHA: commit["id"].(string), ETag: resp.Header.Get("ETag")}, commit, nil
 }
 
 func makeGitLabURL(endpoint, repo, ref string) string {
 	values := url.Values{
-		"ref": []string{ref},
+		"ref_name": []string{ref},
 	}
 	return fmt.Sprintf("%s/api/v4/projects/%s/repository/commits?%s",
 		endpoint, strings.Replace(repo, "/", "%2F", -1),

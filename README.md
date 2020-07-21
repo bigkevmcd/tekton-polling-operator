@@ -35,8 +35,6 @@ a specific ref changes.
 
 You'll want a pipeline to be executed on change.
 
-This pipeline **must** accept two parameters:
-
 ```yaml
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
@@ -51,9 +49,12 @@ spec:
     type: string
     description: "the cloneURL that the change was detected in"
   tasks:
+    # insert the tasks below
 ```
 
-A sample pipeline  is provided in the [examples](./examples) directory.
+This pipeline accepts two parameters, the new commit SHA, and the repoURL.
+
+ sample pipeline is provided in the [examples](./examples) directory.
 
 ## Monitoring a Repository
 
@@ -73,13 +74,28 @@ spec:
   pipelineRef:
     name: github-poll-pipeline
     namespace: test-ns # optional: if provided, the pipelinerun will be created in this namespace to reference the pipeline.
+    params:
+    - name: sha
+      expression: commit.sha
+    - name: repoURL
+      expression: repoURL
 ```
 
 This defines a repository that monitors the `main` branch in
 `https://github.com/my-org/my-repo.git`, checking every 5 minutes, and executing
 the `github-poll-pipeline` when a change is detected.
 
+The parameters are extracted from the commit body, the expressions are
+[CEL](https://github.com/google/cel-go) expressions.
+
+The expressions can access the data from the commit as `commit` and the
+configured repository URL as `repoURL`.
+
+For GitHub repositories, the commit data will have the structure [here](https://developer.github.com/v3/repos/commits/#get-a-commit).
+
 You can also monitor `GitLab` repositories, specifying the type as `gitlab`.
+
+In this case, the commit data will have the structure [here](https://docs.gitlab.com/ee/api/commits.html#list-repository-commits).
 
 ## Authenticating against a Private Repository
 
@@ -97,6 +113,11 @@ spec:
   frequency: 2m
   pipelineRef:
     name: github-poll-pipeline
+    params:
+    - name: sha
+      expression: commit.sha
+    - name: repoURL
+      expression: repoURL
   auth:
     secretRef:
       name:  my-github-secret

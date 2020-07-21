@@ -122,8 +122,8 @@ func makeGitLabAPIServer(t *testing.T, authToken, wantPath, wantRef, etag string
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
-		if queryRef := r.URL.Query().Get("ref"); queryRef != wantRef {
-			t.Errorf("got query ref %#v, want %#v", queryRef, wantRef)
+		if queryRef := r.URL.Query().Get("ref_name"); queryRef != wantRef {
+			t.Errorf("got query ref_name %#v, want %#v", queryRef, wantRef)
 		}
 		if authToken != "" {
 			if auth := r.Header.Get("Private-Token"); auth != authToken {
