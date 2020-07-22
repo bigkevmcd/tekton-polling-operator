@@ -1,4 +1,4 @@
-# tekton-polling-operator
+# tekton-polling-operator ![Go](https://github.com/bigkevmcd/tekton-polling-operator/workflows/Go/badge.svg)
 
 A simple git repository poller.
 
