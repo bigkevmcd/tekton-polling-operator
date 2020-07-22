@@ -8,3 +8,8 @@ spec:
   frequency: 5m
   pipelineRef:
     name: github-poll-pipeline
+    params:
+    - name: sha
+      expression: commit.sha
+    - name: repoURL
+      expression: repoURL
