@@ -45,11 +45,11 @@ func (m *MockRunner) AssertPipelineRun(pipelineName, ns string, wantParams []pip
 		m.t.Fatalf("no pipeline run for %s/%s", ns, pipelineName)
 	}
 	if diff := cmp.Diff(wantParams, run.params); diff != "" {
-		m.t.Fatalf("incorrect params for pipeline run, got %#v, want %#v", run.params, wantParams)
+		m.t.Fatalf("incorrect params for pipelinerun:\n%s", diff)
 	}
 
 	if diff := cmp.Diff(wantResources, run.resources); diff != "" {
-		m.t.Fatalf("incorrect resources for pipeline run, got %#v, want %#v", run.resources, wantResources)
+		m.t.Fatalf("incorrect resources for pipeline run:\n%s", diff)
 	}
 }
 

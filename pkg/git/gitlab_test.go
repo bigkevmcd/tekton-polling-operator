@@ -118,16 +118,14 @@ func TestGitLabWithNoAuthentication(t *testing.T) {
 func makeGitLabAPIServer(t *testing.T, authToken, wantPath, wantRef, etag string, response []byte) *httptest.Server {
 	return httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != wantPath {
-			t.Logf("got URL %#v, want %#v", r.URL.Path, wantPath)
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 		if queryRef := r.URL.Query().Get("ref_name"); queryRef != wantRef {
-			t.Errorf("got query ref_name %#v, want %#v", queryRef, wantRef)
+			w.WriteHeader(http.StatusNotAcceptable)
 		}
 		if authToken != "" {
 			if auth := r.Header.Get("Private-Token"); auth != authToken {
-				t.Logf("got auth token %#v, want %#v", auth, authToken)
 				w.WriteHeader(http.StatusNotFound)
 				return
 			}
