@@ -164,3 +164,10 @@ spec:
         - name: url
           value: $(params.repoURL)
 ```
+
+## FAQ
+
+### Do you support TriggerBindings and TriggerTemplates?
+
+Not yet, they're fairly tightly bound to TektonTriggers just now, so this will
+require some work to tease that apart, but the plan is to support them.
