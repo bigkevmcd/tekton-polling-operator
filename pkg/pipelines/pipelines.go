@@ -3,8 +3,10 @@ package pipelines
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	pipelinev1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+	resourcev1alpha1 "github.com/tektoncd/pipeline/pkg/apis/resource/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -46,7 +48,7 @@ func (c *ClientPipelineRunner) makePipelineRun(pipelineName, ns string, params [
 		Spec: pipelinev1.PipelineRunSpec{
 			PipelineRef: &pipelinev1.PipelineRef{Name: pipelineName},
 			Params:      params,
-			Resources:   res,
+			Resources:   applyReplacements(res, params),
 		},
 	}
 }
@@ -58,4 +60,28 @@ func objectMetaCreator(ns string) metav1.ObjectMeta {
 		GenerateName: pipelineRunNames,
 		Namespace:    ns,
 	}
+}
+
+func applyReplacements(res []pipelinev1.PipelineResourceBinding, params []pipelinev1.Param) []pipelinev1.PipelineResourceBinding {
+	updated := []pipelinev1.PipelineResourceBinding{}
+	for _, r := range res {
+		newParams := []resourcev1alpha1.ResourceParam{}
+		for _, p := range r.ResourceSpec.Params {
+			newParams = append(newParams, patchParam(params, p))
+		}
+		r.ResourceSpec.Params = newParams
+		updated = append(updated, r)
+	}
+	return updated
+}
+
+// TODO: This is a grim hack - drop support for resources again.
+func patchParam(params []pipelinev1.Param, param resourcev1alpha1.ResourceParam) resourcev1alpha1.ResourceParam {
+	for _, p := range params {
+		replace := fmt.Sprintf("$(params.%s)", p.Name)
+		if p.Value.Type == "string" {
+			param.Value = strings.ReplaceAll(param.Value, replace, p.Value.StringVal)
+		}
+	}
+	return param
 }

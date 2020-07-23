@@ -14,7 +14,7 @@ $ kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/previ
 Then you'll need to install the polling-operator.
 
 ```shell
-$ kubectl apply -f https://github.com/bigkevmcd/tekton-polling-operator/releases/download/v0.1.0/release-v0.1.0.yaml
+$ kubectl apply -f https://github.com/bigkevmcd/tekton-polling-operator/releases/download/v0.2.0/release-v0.1.0.yaml
 ```
 
 ## GitHub
@@ -131,3 +131,36 @@ authenticate the API call to GitHub.
 
 See the documentation [here](docs/configuring_security.md) for how to grant
 access for the operator to create pipelineruns in different namespaces.
+
+## Resource bindings
+
+Yes...resources are deprecated and probably going away in their current form,
+but you might want to still use them...
+
+```yaml
+apiVersion: polling.tekton.dev/v1alpha1
+kind: Repository
+metadata:
+  name: demo-repository
+spec:
+  url: https://github.com/bigkevmcd/tekton-polling-operator.git
+  ref: main
+  type: github
+  frequency: 30s
+  pipelineRef:
+    name: github-poll-pipeline-with-resource
+    params:
+    - name: sha
+      expression: commit.sha
+    - name: repoURL
+      expression: repoURL
+    resources:
+    - name: app-git
+      resourceSpec:
+        type: git
+        params:
+        - name: revision
+          value: $(params.sha)
+        - name: url
+          value: $(params.repoURL)
+```

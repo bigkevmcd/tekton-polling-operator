@@ -1,4 +1,4 @@
-apiVersion: tekton.dev/v1beta1
+apiVersion: tekton.dev/v1alpha1
 kind: Pipeline
 metadata:
   name: github-poll-pipeline-with-resource
@@ -21,6 +21,10 @@ spec:
     - name: repoURL
       value: $(params.repoURL)
     taskSpec:
+      inputs:
+        resources:
+        - name: app-git
+          type: git
       params:
       - name: sha
         type: string
@@ -32,3 +36,8 @@ spec:
         script: |
           echo "SHA change detected $(params.sha)"
           echo "                    $(params.repoURL)"
+          ls /workspace/app-git
+    resources:
+      inputs:
+      - name: app-git
+        resource: app-git

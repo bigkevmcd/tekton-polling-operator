@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	pipelinev1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+	resourcev1alpha1 "github.com/tektoncd/pipeline/pkg/apis/resource/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -38,7 +39,19 @@ func TestRunPipelineCreatesPipelineRun(t *testing.T) {
 	params := []pipelinev1.Param{
 		{Name: "test", Value: pipelinev1.NewArrayOrString("value")},
 	}
-	resources := []pipelinev1.PipelineResourceBinding{{Name: "testing"}}
+	resources := []pipelinev1.PipelineResourceBinding{
+		{
+			Name: "testing",
+			ResourceSpec: &resourcev1alpha1.PipelineResourceSpec{
+				Params: []resourcev1alpha1.ResourceParam{
+					{
+						Name:  "testing",
+						Value: "$(params.test)",
+					},
+				},
+			},
+		},
+	}
 	_, err := r.Run(context.Background(), testPipelineName, testNamespace, params, resources)
 
 	pr := &pipelinev1.PipelineRun{}
@@ -59,11 +72,62 @@ func TestRunPipelineCreatesPipelineRun(t *testing.T) {
 		Spec: pipelinev1.PipelineRunSpec{
 			Params:      params,
 			PipelineRef: &pipelinev1.PipelineRef{Name: testPipelineName},
-			Resources:   resources,
+			Resources: []pipelinev1.PipelineResourceBinding{
+				{
+					Name: "testing",
+					ResourceSpec: &resourcev1alpha1.PipelineResourceSpec{
+						Params: []resourcev1alpha1.ResourceParam{
+							{
+								Name:  "testing",
+								Value: "value",
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 
 	if diff := cmp.Diff(pr, want); diff != "" {
 		t.Fatalf("got an incorrect PipelineRun back:\n%s", diff)
+	}
+}
+
+func TestApplyReplacements(t *testing.T) {
+	resources := []pipelinev1.PipelineResourceBinding{
+		{
+			Name: "testing",
+			ResourceSpec: &resourcev1alpha1.PipelineResourceSpec{
+				Params: []resourcev1alpha1.ResourceParam{
+					{
+						Name:  "testing",
+						Value: "$(params.test)",
+					},
+				},
+			},
+		},
+	}
+	params := []pipelinev1.Param{
+		{Name: "test", Value: pipelinev1.NewArrayOrString("value")},
+	}
+
+	replacements := applyReplacements(resources, params)
+
+	want := []pipelinev1.PipelineResourceBinding{
+		{
+			Name: "testing",
+			ResourceSpec: &resourcev1alpha1.PipelineResourceSpec{
+				Params: []resourcev1alpha1.ResourceParam{
+					{
+						Name:  "testing",
+						Value: "value",
+					},
+				},
+			},
+		},
+	}
+
+	if diff := cmp.Diff(want, replacements); diff != "" {
+		t.Fatalf("applyReplacements:\n%s", diff)
 	}
 }
