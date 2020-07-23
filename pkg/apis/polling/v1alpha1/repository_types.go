@@ -3,6 +3,7 @@ package v1alpha1
 import (
 	"time"
 
+	pipelinev1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -28,9 +29,10 @@ type RepositorySpec struct {
 
 // PipelineRef links to the Pipeline to execute.
 type PipelineRef struct {
-	Name      string  `json:"name"`
-	Namespace string  `json:"namespace,omitempty"`
-	Params    []Param `json:"params,omitempty"`
+	Name      string                               `json:"name"`
+	Namespace string                               `json:"namespace,omitempty"`
+	Params    []Param                              `json:"params,omitempty"`
+	Resources []pipelinev1.PipelineResourceBinding `json:"resources,omitempty"`
 }
 
 type Param struct {

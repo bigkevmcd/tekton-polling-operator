@@ -1,0 +1,34 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: github-poll-pipeline-with-resource
+spec:
+  resources:
+  - name: app-git
+    type: git
+  params:
+  - name: sha
+    type: string
+    description: "the SHA of the recently detected change"
+  - name: repoURL
+    type: string
+    description: "the cloneURL that the change was detected in"
+  tasks:
+  - name: echo-changes
+    params:
+    - name: sha
+      value: $(params.sha)
+    - name: repoURL
+      value: $(params.repoURL)
+    taskSpec:
+      params:
+      - name: sha
+        type: string
+      - name: repoURL
+        type: string
+      steps:
+      - name: echo
+        image: alpine
+        script: |
+          echo "SHA change detected $(params.sha)"
+          echo "                    $(params.repoURL)"

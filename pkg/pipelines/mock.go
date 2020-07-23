@@ -9,36 +9,47 @@ import (
 	pipelinev1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 )
 
+var _ PipelineRunner = (*MockRunner)(nil)
+
 // NewMockRunner creates and returns a new mock PipelineRunner.
 func NewMockRunner(t *testing.T) *MockRunner {
-	return &MockRunner{runs: make(map[string][]pipelinev1.Param), t: t}
+	return &MockRunner{runs: make(map[string]run), t: t}
 }
 
 // MockRunner is a mock pipeline runner that returns fixed responses to runs.
 type MockRunner struct {
 	t        *testing.T
-	runs     map[string][]pipelinev1.Param
+	runs     map[string]run
 	runError error
 }
 
+type run struct {
+	params    []pipelinev1.Param
+	resources []pipelinev1.PipelineResourceBinding
+}
+
 // Run is an implementation of the PipelineRunner interface.
-func (m *MockRunner) Run(ctx context.Context, pipelineName, ns string, params []pipelinev1.Param) (*pipelinev1.PipelineRun, error) {
+func (m *MockRunner) Run(ctx context.Context, pipelineName, ns string, params []pipelinev1.Param, res []pipelinev1.PipelineResourceBinding) (*pipelinev1.PipelineRun, error) {
 	if m.runError != nil {
 		return nil, m.runError
 	}
-	m.runs[mockKey(ns, pipelineName)] = params
+	m.runs[mockKey(ns, pipelineName)] = run{params: params, resources: res}
 	return &pipelinev1.PipelineRun{}, nil
 }
 
 // AssertPipelineRun ensures that the pipeline run was triggered.
-func (m *MockRunner) AssertPipelineRun(pipelineName, ns string, want []pipelinev1.Param) {
+func (m *MockRunner) AssertPipelineRun(pipelineName, ns string, wantParams []pipelinev1.Param, wantResources []pipelinev1.PipelineResourceBinding) {
 	m.t.Helper()
-	params, ok := m.runs[mockKey(ns, pipelineName)]
+	run, ok := m.runs[mockKey(ns, pipelineName)]
 	if !ok {
 		m.t.Fatalf("no pipeline run for %s/%s", ns, pipelineName)
 	}
-	if diff := cmp.Diff(want, params); diff != "" {
-		m.t.Fatalf("incorrect params for pipeline run, got %#v, want %#v", params, want)
+	if diff := cmp.Diff(wantParams, run.params); diff != "" {
+		m.t.Fatalf("incorrect params for pipeline run, got %#v, want %#v", run.params, wantParams)
+	}
+
+	if diff := cmp.Diff(wantResources, run.resources); diff != "" {
+		m.t.Fatalf("incorrect resources for pipeline run, got %#v, want %#v", run.resources, wantResources)
 	}
 }
 

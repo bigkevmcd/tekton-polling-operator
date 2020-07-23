@@ -72,6 +72,77 @@ spec:
                       - name
                       type: object
                     type: array
+                  resources:
+                    items:
+                      description: PipelineResourceBinding connects a reference to
+                        an instance of a PipelineResource with a PipelineResource
+                        dependency that the Pipeline has declared
+                      properties:
+                        name:
+                          description: Name is the name of the PipelineResource in
+                            the Pipeline's declaration
+                          type: string
+                        resourceRef:
+                          description: ResourceRef is a reference to the instance
+                            of the actual PipelineResource that should be used
+                          properties:
+                            apiVersion:
+                              description: API version of the referent
+                              type: string
+                            name:
+                              description: 'Name of the referent; More info: http://kubernetes.io/docs/user-guide/identifiers#names'
+                              type: string
+                          type: object
+                        resourceSpec:
+                          description: ResourceSpec is specification of a resource
+                            that should be created and consumed by the task
+                          properties:
+                            description:
+                              description: Description is a user-facing description
+                                of the resource that may be used to populate a UI.
+                              type: string
+                            params:
+                              items:
+                                description: ResourceParam declares a string value
+                                  to use for the parameter called Name, and is used
+                                  in the specific context of PipelineResources.
+                                properties:
+                                  name:
+                                    type: string
+                                  value:
+                                    type: string
+                                required:
+                                - name
+                                - value
+                                type: object
+                              type: array
+                            secrets:
+                              description: Secrets to fetch to populate some of resource
+                                fields
+                              items:
+                                description: SecretParam indicates which secret can
+                                  be used to populate a field of the resource
+                                properties:
+                                  fieldName:
+                                    type: string
+                                  secretKey:
+                                    type: string
+                                  secretName:
+                                    type: string
+                                required:
+                                - fieldName
+                                - secretKey
+                                - secretName
+                                type: object
+                              type: array
+                            type:
+                              type: string
+                          required:
+                          - params
+                          - type
+                          type: object
+                      type: object
+                    type: array
                 required:
                 - name
                 type: object

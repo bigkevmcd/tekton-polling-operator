@@ -38,10 +38,13 @@ func TestRunPipelineCreatesPipelineRun(t *testing.T) {
 	params := []pipelinev1.Param{
 		{Name: "test", Value: pipelinev1.NewArrayOrString("value")},
 	}
-	_, err := r.Run(context.Background(), testPipelineName, testNamespace, params)
+	resources := []pipelinev1.PipelineResourceBinding{{Name: "testing"}}
+	_, err := r.Run(context.Background(), testPipelineName, testNamespace, params, resources)
 
 	pr := &pipelinev1.PipelineRun{}
-	err = cl.Get(context.Background(), types.NamespacedName{Namespace: testNamespace, Name: testPipelineRun}, pr)
+	err = cl.Get(context.Background(), types.NamespacedName{
+		Namespace: testNamespace, Name: testPipelineRun,
+	}, pr)
 	if err != nil {
 		t.Fatalf("get pipelinerun: %s", err)
 	}
@@ -56,6 +59,7 @@ func TestRunPipelineCreatesPipelineRun(t *testing.T) {
 		Spec: pipelinev1.PipelineRunSpec{
 			Params:      params,
 			PipelineRef: &pipelinev1.PipelineRef{Name: testPipelineName},
+			Resources:   resources,
 		},
 	}
 

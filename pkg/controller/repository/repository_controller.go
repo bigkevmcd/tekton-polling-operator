@@ -143,7 +143,7 @@ func (r *ReconcileRepository) Reconcile(req reconcile.Request) (reconcile.Result
 		reqLogger.Error(err, "failed to parse the parameters")
 		return reconcile.Result{}, err
 	}
-	pr, err := r.pipelineRunner.Run(ctx, repo.Spec.Pipeline.Name, runNS, params)
+	pr, err := r.pipelineRunner.Run(ctx, repo.Spec.Pipeline.Name, runNS, params, repo.Spec.Pipeline.Resources)
 	if err != nil {
 		reqLogger.Error(err, "failed to create a PipelineRun", "pipelineName", repo.Spec.Pipeline.Name)
 		return reconcile.Result{}, err
