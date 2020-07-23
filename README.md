@@ -171,3 +171,18 @@ spec:
 
 Not yet, they're fairly tightly bound to TektonTriggers just now, so this will
 require some work to tease that apart, but the plan is to support them.
+
+### How do I insert a static string in to a CEL param?
+
+Ahhh...this is a trick...
+
+```yaml
+params:
+- name: this-text
+  expression: "'this-message'"
+```
+
+Note the use of _double_ quotes and _single_ quotes, the value of this is the
+string `'this-message'`.
+
+YAML makes this tricky, but now you know...
