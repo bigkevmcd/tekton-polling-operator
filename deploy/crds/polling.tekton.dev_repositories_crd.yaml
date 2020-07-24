@@ -56,6 +56,45 @@ spec:
               pipelineRef:
                 description: PipelineRef links to the Pipeline to execute.
                 properties:
+                  bindings:
+                    items:
+                      description: EventListenerBinding refers to a particular TriggerBinding
+                        or ClusterTriggerBindingresource.
+                      properties:
+                        apiversion:
+                          type: string
+                        kind:
+                          description: Check that EventListener may be validated and
+                            defaulted. TriggerBindingKind defines the type of TriggerBinding
+                            used by the EventListener.
+                          type: string
+                        name:
+                          type: string
+                        ref:
+                          type: string
+                        spec:
+                          description: TriggerBindingSpec defines the desired state
+                            of the TriggerBinding.
+                          properties:
+                            params:
+                              description: Params defines the parameter mapping from
+                                the given input event.
+                              items:
+                                description: Param defines a string value to be used
+                                  for a ParamSpec with the same name.
+                                properties:
+                                  name:
+                                    type: string
+                                  value:
+                                    type: string
+                                required:
+                                - name
+                                - value
+                                type: object
+                              type: array
+                          type: object
+                      type: object
+                    type: array
                   name:
                     type: string
                   namespace:
@@ -72,79 +111,21 @@ spec:
                       - name
                       type: object
                     type: array
-                  resources:
-                    items:
-                      description: PipelineResourceBinding connects a reference to
-                        an instance of a PipelineResource with a PipelineResource
-                        dependency that the Pipeline has declared
-                      properties:
-                        name:
-                          description: Name is the name of the PipelineResource in
-                            the Pipeline's declaration
-                          type: string
-                        resourceRef:
-                          description: ResourceRef is a reference to the instance
-                            of the actual PipelineResource that should be used
-                          properties:
-                            apiVersion:
-                              description: API version of the referent
-                              type: string
-                            name:
-                              description: 'Name of the referent; More info: http://kubernetes.io/docs/user-guide/identifiers#names'
-                              type: string
-                          type: object
-                        resourceSpec:
-                          description: ResourceSpec is specification of a resource
-                            that should be created and consumed by the task
-                          properties:
-                            description:
-                              description: Description is a user-facing description
-                                of the resource that may be used to populate a UI.
-                              type: string
-                            params:
-                              items:
-                                description: ResourceParam declares a string value
-                                  to use for the parameter called Name, and is used
-                                  in the specific context of PipelineResources.
-                                properties:
-                                  name:
-                                    type: string
-                                  value:
-                                    type: string
-                                required:
-                                - name
-                                - value
-                                type: object
-                              type: array
-                            secrets:
-                              description: Secrets to fetch to populate some of resource
-                                fields
-                              items:
-                                description: SecretParam indicates which secret can
-                                  be used to populate a field of the resource
-                                properties:
-                                  fieldName:
-                                    type: string
-                                  secretKey:
-                                    type: string
-                                  secretName:
-                                    type: string
-                                required:
-                                - fieldName
-                                - secretKey
-                                - secretName
-                                type: object
-                              type: array
-                            type:
-                              type: string
-                          required:
-                          - params
-                          - type
-                          type: object
-                      type: object
-                    type: array
+                  template:
+                    description: EventListenerTemplate refers to a particular TriggerTemplate
+                      resource.
+                    properties:
+                      apiversion:
+                        type: string
+                      name:
+                        type: string
+                    required:
+                    - name
+                    type: object
                 required:
+                - bindings
                 - name
+                - template
                 type: object
               ref:
                 type: string

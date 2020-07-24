@@ -24,21 +24,20 @@ type MockRunner struct {
 }
 
 type run struct {
-	params    []pipelinev1.Param
-	resources []pipelinev1.PipelineResourceBinding
+	params []pipelinev1.Param
 }
 
 // Run is an implementation of the PipelineRunner interface.
-func (m *MockRunner) Run(ctx context.Context, pipelineName, ns string, params []pipelinev1.Param, res []pipelinev1.PipelineResourceBinding) (*pipelinev1.PipelineRun, error) {
+func (m *MockRunner) Run(ctx context.Context, pipelineName, ns string, params []pipelinev1.Param) (*pipelinev1.PipelineRun, error) {
 	if m.runError != nil {
 		return nil, m.runError
 	}
-	m.runs[mockKey(ns, pipelineName)] = run{params: params, resources: res}
+	m.runs[mockKey(ns, pipelineName)] = run{params: params}
 	return &pipelinev1.PipelineRun{}, nil
 }
 
 // AssertPipelineRun ensures that the pipeline run was triggered.
-func (m *MockRunner) AssertPipelineRun(pipelineName, ns string, wantParams []pipelinev1.Param, wantResources []pipelinev1.PipelineResourceBinding) {
+func (m *MockRunner) AssertPipelineRun(pipelineName, ns string, wantParams []pipelinev1.Param) {
 	m.t.Helper()
 	run, ok := m.runs[mockKey(ns, pipelineName)]
 	if !ok {
@@ -46,10 +45,6 @@ func (m *MockRunner) AssertPipelineRun(pipelineName, ns string, wantParams []pip
 	}
 	if diff := cmp.Diff(wantParams, run.params); diff != "" {
 		m.t.Fatalf("incorrect params for pipelinerun:\n%s", diff)
-	}
-
-	if diff := cmp.Diff(wantResources, run.resources); diff != "" {
-		m.t.Fatalf("incorrect resources for pipeline run:\n%s", diff)
 	}
 }
 

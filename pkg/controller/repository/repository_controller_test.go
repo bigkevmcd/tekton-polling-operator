@@ -38,11 +38,7 @@ const (
 	testPipelineName        = "test-pipeline"
 )
 
-var (
-	_ reconcile.Reconciler = &ReconcileRepository{}
-
-	testResources = []pipelinev1beta1.PipelineResourceBinding{{Name: "testing"}}
-)
+var _ reconcile.Reconciler = &ReconcileRepository{}
 
 func TestReconcileRepositoryWithEmptyPollState(t *testing.T) {
 	logf.SetLogger(logf.ZapLogger(true))
@@ -65,8 +61,7 @@ func TestReconcileRepositoryWithEmptyPollState(t *testing.T) {
 	fatalIfError(t, err)
 	r.pipelineRunner.(*pipelines.MockRunner).AssertPipelineRun(
 		testPipelineName, testRepositoryNamespace,
-		makeTestParams(map[string]string{"one": testRepoURL, "two": "main"}),
-		testResources)
+		makeTestParams(map[string]string{"one": testRepoURL, "two": "main"}))
 
 	wantStatus := pollingv1.RepositoryStatus{
 		PollStatus: pollingv1.PollStatus{
@@ -104,8 +99,7 @@ func TestReconcileRepositoryInPipelineNamespace(t *testing.T) {
 	fatalIfError(t, err)
 	r.pipelineRunner.(*pipelines.MockRunner).AssertPipelineRun(
 		testPipelineName, pipelineNS,
-		makeTestParams(map[string]string{"one": testRepoURL, "two": "main"}),
-		testResources)
+		makeTestParams(map[string]string{"one": testRepoURL, "two": "main"}))
 
 	wantStatus := pollingv1.RepositoryStatus{
 		PollStatus: pollingv1.PollStatus{
@@ -305,7 +299,6 @@ func makeRepository(opts ...func(*pollingv1.Repository)) *pollingv1.Repository {
 					{Name: "one", Expression: "repoURL"},
 					{Name: "two", Expression: "commit.id"},
 				},
-				Resources: testResources,
 			},
 		},
 		Status: pollingv1.RepositoryStatus{},

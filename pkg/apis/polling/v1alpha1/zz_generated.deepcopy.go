@@ -5,7 +5,7 @@
 package v1alpha1
 
 import (
-	v1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+	triggersv1alpha1 "github.com/tektoncd/triggers/pkg/apis/triggers/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
@@ -51,13 +51,18 @@ func (in *PipelineRef) DeepCopyInto(out *PipelineRef) {
 		*out = make([]Param, len(*in))
 		copy(*out, *in)
 	}
-	if in.Resources != nil {
-		in, out := &in.Resources, &out.Resources
-		*out = make([]v1beta1.PipelineResourceBinding, len(*in))
+	if in.Bindings != nil {
+		in, out := &in.Bindings, &out.Bindings
+		*out = make([]*triggersv1alpha1.EventListenerBinding, len(*in))
 		for i := range *in {
-			(*in)[i].DeepCopyInto(&(*out)[i])
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(triggersv1alpha1.EventListenerBinding)
+				(*in).DeepCopyInto(*out)
+			}
 		}
 	}
+	out.Template = in.Template
 	return
 }
 

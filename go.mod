@@ -5,11 +5,12 @@ go 1.14
 require (
 	github.com/go-logr/logr v0.1.0
 	github.com/golang/protobuf v1.4.2
-	github.com/google/cel-go v0.5.1
+	github.com/google/cel-go v0.6.0
 	github.com/google/go-cmp v0.5.2
 	github.com/operator-framework/operator-sdk v0.17.1
 	github.com/spf13/pflag v1.0.5
 	github.com/tektoncd/pipeline v0.18.1
+	github.com/tektoncd/triggers v0.10.0
 	k8s.io/api v0.18.8
 	k8s.io/apimachinery v0.19.0
 	k8s.io/client-go v12.0.0+incompatible
