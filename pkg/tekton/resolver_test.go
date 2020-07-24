@@ -1,3 +1,3 @@
 package tekton
 
-var _ Resolver = (*ResourceResolver)(nil)
+// var _ Resolver = (*ResourceResolver)(nil)
