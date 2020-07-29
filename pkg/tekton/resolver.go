@@ -11,12 +11,14 @@ import (
 	"github.com/bigkevmcd/tekton-polling-operator/pkg/git"
 )
 
+// New creates a new ResourceResolver.
 type ResourceResolver struct {
-	client triggersclientset.Interface
+	clientFactory func(string) ResolverClient
 }
 
+// New creates and returns a New ResourceResolver.
 func New(c triggersclientset.Interface) *ResourceResolver {
-	return &ResourceResolver{client: c}
+	return &ResourceResolver{clientFactory: clientFactory(c)}
 }
 
 func (r ResourceResolver) Resolve(ns string, bindings []*triggersv1.EventListenerBinding, tt triggersv1.EventListenerTemplate, commit git.Commit) ([]json.RawMessage, error) {
@@ -24,11 +26,11 @@ func (r ResourceResolver) Resolve(ns string, bindings []*triggersv1.EventListene
 		Bindings: bindings,
 		Template: tt,
 	}
-
+	client := r.clientFactory(ns)
 	rt, err := template.ResolveTrigger(trigger,
-		r.client.TriggersV1alpha1().TriggerBindings(ns).Get,
-		r.client.TriggersV1alpha1().ClusterTriggerBindings().Get,
-		r.client.TriggersV1alpha1().TriggerTemplates(ns).Get)
+		client.GetTriggerBinding,
+		client.GetClusterTriggerBinding,
+		client.GetTriggerTemplate)
 	if err != nil {
 		return nil, err
 	}
@@ -43,4 +45,10 @@ func (r ResourceResolver) Resolve(ns string, bindings []*triggersv1.EventListene
 	}
 	resources := template.ResolveResources(rt.TriggerTemplate, params)
 	return resources, nil
+}
+
+func clientFactory(c triggersclientset.Interface) func(string) ResolverClient {
+	return func(ns string) ResolverClient {
+		return NewVersionedClient(ns, c)
+	}
 }
