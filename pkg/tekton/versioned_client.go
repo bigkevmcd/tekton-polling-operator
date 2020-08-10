@@ -21,15 +21,17 @@ func NewVersionedClient(ns string, c triggersclientset.Interface) *VersionedClie
 	}
 }
 
+// GetTriggerBinding is an implementation of the ResolverClient interface.
 func (v *VersionedClient) GetTriggerBinding(name string, options metav1.GetOptions) (*triggersv1.TriggerBinding, error) {
 	return v.client.TriggersV1alpha1().TriggerBindings(v.ns).Get(name, options)
 }
 
+// GetTriggerTemplate is an implementation of the ResolverClient interface.
 func (v *VersionedClient) GetTriggerTemplate(name string, options metav1.GetOptions) (*triggersv1.TriggerTemplate, error) {
 	return v.client.TriggersV1alpha1().TriggerTemplates(v.ns).Get(name, options)
-
 }
 
+// GetTriggerTriggerBinding is an implementation of the ResolverClient interface.
 func (v *VersionedClient) GetClusterTriggerBinding(name string, options metav1.GetOptions) (*triggersv1.ClusterTriggerBinding, error) {
 	return v.client.TriggersV1alpha1().ClusterTriggerBindings().Get(name, options)
 }

@@ -1,7 +1,6 @@
 package tekton
 
 import (
-	"context"
 	"encoding/json"
 	"testing"
 
@@ -22,8 +21,7 @@ const testNS = "testing"
 func TestResolveWithKnownResources(t *testing.T) {
 	binding := makeBinding()
 	template := makeTemplate(t)
-	triggersClient := makeClient(t, context.Background(),
-		binding, template)
+	triggersClient := makeClient(binding, template)
 
 	commit := map[string]interface{}{
 		"id": "1f18b9248b11b31a4dc5d36af4f8acadd5fbb76e",
@@ -136,13 +134,32 @@ func makeBinding() *triggersv1.TriggerBinding {
 	}
 }
 
-func makeClient(t *testing.T, ctx context.Context, objs ...runtime.Object) triggersclientset.Interface {
+func makeClusterBinding() *triggersv1.ClusterTriggerBinding {
+	typeMeta := metav1.TypeMeta{
+		APIVersion: "triggers.tekton.dev/v1alpha1",
+		Kind:       "ClusterTriggerBinding",
+	}
+	return &triggersv1.ClusterTriggerBinding{
+		TypeMeta: typeMeta,
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-cluster-binding",
+			Namespace: testNS,
+		},
+		Spec: triggersv1.TriggerBindingSpec{
+			Params: []triggersv1.Param{
+				{Name: "gitrevision", Value: "$(body.id)"},
+			},
+		},
+	}
+}
+
+func makeClient(objs ...runtime.Object) triggersclientset.Interface {
 	return fake.NewSimpleClientset(objs...)
 }
 
 func mustMarshal(t *testing.T, v interface{}) []byte {
 	t.Helper()
-	b, err := json.Marshal(v) // createDevCDPipelineRun(saName))
+	b, err := json.Marshal(v)
 	if err != nil {
 		t.Fatal(err)
 	}
