@@ -261,6 +261,33 @@ func TestReconcileRepositoryClearsLastErrorOnSuccessfulPoll(t *testing.T) {
 	fatalIfError(t, cl.Get(ctx, req.NamespacedName, loaded))
 }
 
+func Test_repoFromURL(t *testing.T) {
+	urlTests := []struct {
+		url          string
+		wantPath     string
+		wantEndpoint string
+	}{
+		{"https://github.com/my-org/my-repo.git", "my-org/my-repo", "https://api.github.com"},
+		{"https://gitlab.com/my-org/my-repo.git", "my-org/my-repo", "https://gitlab.com"},
+		{"https://example.github.com/my-org/my-repo.git", "my-org/my-repo", "https://api.example.github.com"},
+		{"https://example.com/my-org/my-repo.git", "my-org/my-repo", "https://example.com"},
+	}
+
+	for _, tt := range urlTests {
+		path, endpoint, err := repoFromURL(tt.url)
+		if err != nil {
+			t.Errorf("repoFromURL(%q) failed with an error: %s", tt.url, err)
+			continue
+		}
+		if path != tt.wantPath {
+			t.Errorf("repoFromURL(%q) path got %q, want %q", tt.url, path, tt.wantPath)
+		}
+		if endpoint != tt.wantEndpoint {
+			t.Errorf("repoFromURL(%q) endpoint got %q, want %q", tt.url, endpoint, tt.wantEndpoint)
+		}
+	}
+}
+
 func makeRepository(opts ...func(*pollingv1.Repository)) *pollingv1.Repository {
 	r := &pollingv1.Repository{
 		ObjectMeta: metav1.ObjectMeta{

@@ -191,14 +191,8 @@ func makeParams(commit git.Commit, spec pollingv1.RepositorySpec) ([]pipelinev1.
 func makeCommitPoller(repo *pollingv1.Repository, endpoint, authToken string) git.CommitPoller {
 	switch repo.Spec.Type {
 	case pollingv1.GitHub:
-		if endpoint == "https://github.com" {
-			endpoint = ""
-		}
 		return git.NewGitHubPoller(http.DefaultClient, endpoint, authToken)
 	case pollingv1.GitLab:
-		if endpoint == "https://gitlab.com" {
-			endpoint = ""
-		}
 		return git.NewGitLabPoller(http.DefaultClient, endpoint, authToken)
 	}
 	return nil
@@ -209,7 +203,10 @@ func repoFromURL(s string) (string, string, error) {
 	if err != nil {
 		return "", "", fmt.Errorf("failed to parse repo from URL %#v: %s", s, err)
 	}
-
-	endpoint := fmt.Sprintf("%s://%s", parsed.Scheme, parsed.Host)
+	host := parsed.Host
+	if strings.HasSuffix(host, "github.com") {
+		host = "api." + host
+	}
+	endpoint := fmt.Sprintf("%s://%s", parsed.Scheme, host)
 	return strings.TrimPrefix(strings.TrimSuffix(parsed.Path, ".git"), "/"), endpoint, nil
 }
