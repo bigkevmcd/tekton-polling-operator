@@ -19,13 +19,11 @@ func TestNewGitHubPoller(t *testing.T) {
 		endpoint     string
 		wantEndpoint string
 	}{
-		{"", "https://api.github.com"},
 		{"https://gh.example.com", "https://gh.example.com"},
 	}
 
 	for _, tt := range newTests {
 		c := NewGitHubPoller(http.DefaultClient, tt.endpoint, "testToken")
-
 		if c.endpoint != tt.wantEndpoint {
 			t.Errorf("%#v got %#v, want %#v", tt.endpoint, c.endpoint, tt.wantEndpoint)
 		}
