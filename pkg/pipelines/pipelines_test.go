@@ -37,7 +37,7 @@ func TestRunPipelineCreatesPipelineRun(t *testing.T) {
 	}
 
 	params := []pipelinev1.Param{
-		{Name: "test", Value: pipelinev1.NewArrayOrString("value")},
+		{Name: "test", Value: *pipelinev1.NewArrayOrString("value")},
 	}
 	resources := []pipelinev1.PipelineResourceBinding{
 		{
@@ -108,7 +108,7 @@ func TestApplyReplacements(t *testing.T) {
 		},
 	}
 	params := []pipelinev1.Param{
-		{Name: "test", Value: pipelinev1.NewArrayOrString("value")},
+		{Name: "test", Value: *pipelinev1.NewArrayOrString("value")},
 	}
 
 	replacements := applyReplacements(resources, params)

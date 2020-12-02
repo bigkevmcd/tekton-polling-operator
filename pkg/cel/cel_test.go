@@ -123,7 +123,7 @@ func TestContextEvaluateToParamValue(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	want := pipelinev1beta1.ArrayOrString{
+	want := &pipelinev1beta1.ArrayOrString{
 		Type:     pipelinev1beta1.ParamTypeArray,
 		ArrayVal: []string{"value1", "value2"},
 	}

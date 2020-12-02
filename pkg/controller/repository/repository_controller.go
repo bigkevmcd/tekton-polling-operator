@@ -180,7 +180,7 @@ func makeParams(commit git.Commit, spec pollingv1.RepositorySpec) ([]pipelinev1.
 		if err != nil {
 			return nil, err
 		}
-		params = append(params, pipelinev1.Param{Name: v.Name, Value: val})
+		params = append(params, pipelinev1.Param{Name: v.Name, Value: *val})
 	}
 	return params, nil
 }

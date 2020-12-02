@@ -374,7 +374,7 @@ func makeTestParams(vars map[string]string) []pipelinev1beta1.Param {
 	params := []pipelinev1beta1.Param{}
 	for k, v := range vars {
 		params = append(params, pipelinev1beta1.Param{
-			Name: k, Value: pipelinev1beta1.NewArrayOrString(v)})
+			Name: k, Value: *pipelinev1beta1.NewArrayOrString(v)})
 	}
 	return params
 }

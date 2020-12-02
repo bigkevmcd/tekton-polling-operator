@@ -47,10 +47,10 @@ func (c *Context) Evaluate(expr string) (ref.Val, error) {
 
 // EvaluateToParamValue evaluates the provided expression, and converts it to a
 // pipeline ArrayOrString value for a PipelineRun parameter.
-func (c *Context) EvaluateToParamValue(expr string) (pipelinev1beta1.ArrayOrString, error) {
+func (c *Context) EvaluateToParamValue(expr string) (*pipelinev1beta1.ArrayOrString, error) {
 	res, err := c.Evaluate(expr)
 	if err != nil {
-		return pipelinev1beta1.ArrayOrString{}, err
+		return nil, err
 	}
 	return valToParam(res)
 }
@@ -101,7 +101,7 @@ func commitToMap(v interface{}) (map[string]interface{}, error) {
 }
 
 // TODO: This should probably stringify other ref.Types
-func valToParam(v ref.Val) (pipelinev1beta1.ArrayOrString, error) {
+func valToParam(v ref.Val) (*pipelinev1beta1.ArrayOrString, error) {
 	switch val := v.(type) {
 	case traits.Lister:
 		items := []string{}
@@ -109,7 +109,7 @@ func valToParam(v ref.Val) (pipelinev1beta1.ArrayOrString, error) {
 		for it.HasNext() == types.True {
 			str, err := it.Next().ConvertToNative(reflect.TypeOf(""))
 			if err != nil {
-				return pipelinev1beta1.ArrayOrString{}, fmt.Errorf("failed to convert expression to a string: %w", err)
+				return nil, fmt.Errorf("failed to convert expression to a string: %w", err)
 			}
 			items = append(items, str.(string))
 		}
@@ -119,5 +119,5 @@ func valToParam(v ref.Val) (pipelinev1beta1.ArrayOrString, error) {
 	case types.Double:
 		return pipelinev1beta1.NewArrayOrString(fmt.Sprintf("%g", val.Value().(float64))), nil
 	}
-	return pipelinev1beta1.ArrayOrString{}, fmt.Errorf("unknown result type %T, expression must evaluate to a string", v)
+	return nil, fmt.Errorf("unknown result type %T, expression must evaluate to a string", v)
 }
