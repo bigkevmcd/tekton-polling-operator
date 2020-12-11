@@ -22,7 +22,7 @@ $ kubectl apply -f https://github.com/bigkevmcd/tekton-polling-operator/releases
 This polls a GitHub repository, and triggers pipeline runs when the SHA of the
 a specific ref changes.
 
-It _does not_ use API tokens to do this, instead it uses the method documented
+It _does not_ impact on API rate limits to do this, instead it uses the method documented
 [here](https://developer.github.com/changes/2016-02-24-commit-reference-sha-api/)
 and the ETag to fetch the commit.
 
