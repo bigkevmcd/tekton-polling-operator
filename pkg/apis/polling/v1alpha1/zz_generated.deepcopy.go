@@ -53,16 +53,16 @@ func (in *PipelineRef) DeepCopyInto(out *PipelineRef) {
 	}
 	if in.Bindings != nil {
 		in, out := &in.Bindings, &out.Bindings
-		*out = make([]*triggersv1alpha1.EventListenerBinding, len(*in))
+		*out = make([]*triggersv1alpha1.TriggerSpecBinding, len(*in))
 		for i := range *in {
 			if (*in)[i] != nil {
 				in, out := &(*in)[i], &(*out)[i]
-				*out = new(triggersv1alpha1.EventListenerBinding)
+				*out = new(triggersv1alpha1.TriggerSpecBinding)
 				(*in).DeepCopyInto(*out)
 			}
 		}
 	}
-	out.Template = in.Template
+	in.Template.DeepCopyInto(&out.Template)
 	return
 }
 
