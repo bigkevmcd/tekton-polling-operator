@@ -115,23 +115,19 @@ func TestReconcileRepositoryInPipelineNamespace(t *testing.T) {
 
 func TestReconcileRepositoryWithAuthSecret(t *testing.T) {
 	authTests := []struct {
-		authSecret pollingv1.AuthSecret
+		authSecret pollingv1.SecretRef
 		secretKey  string
 	}{
 		{
-			pollingv1.AuthSecret{
-				SecretReference: corev1.SecretReference{
-					Name: testSecretName,
-				},
+			pollingv1.SecretRef{
+				SecretName: testSecretName,
 			},
 			"token",
 		},
 		{
-			pollingv1.AuthSecret{
-				SecretReference: corev1.SecretReference{
-					Name: testSecretName,
-				},
-				Key: "custom-key",
+			pollingv1.SecretRef{
+				SecretName: testSecretName,
+				SecretKey:  "custom-key",
 			},
 			"custom-key",
 		},
@@ -140,7 +136,7 @@ func TestReconcileRepositoryWithAuthSecret(t *testing.T) {
 	for _, tt := range authTests {
 		logf.SetLogger(logf.ZapLogger(true))
 		repo := makeRepository()
-		repo.Spec.Auth = &tt.authSecret
+		repo.Spec.SecretRef = &tt.authSecret
 		_, r := makeReconciler(t, repo, repo, makeTestSecret(testSecretName, tt.secretKey))
 		r.pollerFactory = func(_ *pollingv1.Repository, endpoint, token string) git.CommitPoller {
 			if token != testAuthToken {

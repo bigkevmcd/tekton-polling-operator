@@ -155,16 +155,16 @@ func (r *ReconcileRepository) Reconcile(req reconcile.Request) (reconcile.Result
 }
 
 func (r *ReconcileRepository) authTokenForRepo(ctx context.Context, logger logr.Logger, namespace string, repo *pollingv1.Repository) (string, error) {
-	if repo.Spec.Auth == nil {
+	if repo.Spec.SecretRef == nil {
 		return "", nil
 	}
 	key := "token"
-	if repo.Spec.Auth.Key != "" {
-		key = repo.Spec.Auth.Key
+	if repo.Spec.SecretRef.SecretKey != "" {
+		key = repo.Spec.SecretRef.SecretKey
 	}
-	authToken, err := r.secretGetter.SecretToken(ctx, types.NamespacedName{Name: repo.Spec.Auth.Name, Namespace: namespace}, key)
+	authToken, err := r.secretGetter.SecretToken(ctx, types.NamespacedName{Name: repo.Spec.SecretRef.SecretName, Namespace: namespace}, key)
 	if err != nil {
-		logger.Error(err, "Getting the auth token failed", "name", repo.Spec.Auth.Name, "namespace", namespace, "key", key)
+		logger.Error(err, "Getting the auth token failed", "name", repo.Spec.SecretRef.SecretName, "namespace", namespace, "key", key)
 		return "", err
 	}
 	return authToken, nil

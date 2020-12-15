@@ -4,7 +4,6 @@ import (
 	"time"
 
 	triggersv1 "github.com/tektoncd/triggers/pkg/apis/triggers/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -21,7 +20,7 @@ const (
 type RepositorySpec struct {
 	URL       string           `json:"url"`
 	Ref       string           `json:"ref,omitempty"`
-	Auth      *AuthSecret      `json:"auth,omitempty"`
+	SecretRef *SecretRef       `json:"secretRef,omitempty"`
 	Type      RepoType         `json:"type,omitempty"`
 	Frequency *metav1.Duration `json:"frequency,omitempty"`
 	Pipeline  PipelineRef      `json:"pipelineRef"`
@@ -42,10 +41,11 @@ type Param struct {
 	Expression string `json:"expression"`
 }
 
-// AuthSecret references a secret for authenticating the request.
-type AuthSecret struct {
-	corev1.SecretReference `json:"secretRef,omitempty"`
-	Key                    string `json:"key,omitempty"`
+// SecretRef contains the information required to reference a single secret
+// string.
+type SecretRef struct {
+	SecretKey  string `json:"secretKey,omitempty"`
+	SecretName string `json:"secretName,omitempty"`
 }
 
 // RepositoryStatus defines the observed state of Repository
