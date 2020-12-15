@@ -68,8 +68,8 @@ func TestResolveWithMissingResources(t *testing.T) {
 func makeEventListenerBindings(b *triggersv1.TriggerBinding) []*triggersv1.EventListenerBinding {
 	return []*triggersv1.EventListenerBinding{
 		{
-			Name: b.Name,
-			Kind: "TriggerBinding",
+			Ref:  b.Name,
+			Kind: triggersv1.TriggerBindingKind(b.Kind),
 		},
 	}
 }
@@ -142,8 +142,7 @@ func makeClusterBinding() *triggersv1.ClusterTriggerBinding {
 	return &triggersv1.ClusterTriggerBinding{
 		TypeMeta: typeMeta,
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-cluster-binding",
-			Namespace: testNS,
+			Name: "test-cluster-binding",
 		},
 		Spec: triggersv1.TriggerBindingSpec{
 			Params: []triggersv1.Param{

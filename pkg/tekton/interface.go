@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	triggersv1 "github.com/tektoncd/triggers/pkg/apis/triggers/v1alpha1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/bigkevmcd/tekton-polling-operator/pkg/git"
 )
@@ -19,7 +18,7 @@ type Resolver interface {
 // ResolverClient is used by a resolver to get the necessary resources to
 // generate the resources.
 type ResolverClient interface {
-	GetTriggerBinding(name string, options metav1.GetOptions) (*triggersv1.TriggerBinding, error)
-	GetTriggerTemplate(name string, options metav1.GetOptions) (*triggersv1.TriggerTemplate, error)
-	GetClusterTriggerBinding(name string, options metav1.GetOptions) (*triggersv1.ClusterTriggerBinding, error)
+	GetTriggerBinding(name string) (*triggersv1.TriggerBinding, error)
+	GetTriggerTemplate(name string) (*triggersv1.TriggerTemplate, error)
+	GetClusterTriggerBinding(name string) (*triggersv1.ClusterTriggerBinding, error)
 }

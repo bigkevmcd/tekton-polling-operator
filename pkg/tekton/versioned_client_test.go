@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var _ ResolverClient = (*VersionedClient)(nil)
@@ -15,7 +14,7 @@ func TestGetTriggerBinding(t *testing.T) {
 
 	r := NewVersionedClient(binding.Namespace, triggersClient)
 
-	loaded, err := r.GetTriggerBinding(binding.Name, metav1.GetOptions{})
+	loaded, err := r.GetTriggerBinding(binding.Name)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -31,7 +30,7 @@ func TestGetTriggerTemplate(t *testing.T) {
 
 	r := NewVersionedClient(template.Namespace, triggersClient)
 
-	loaded, err := r.GetTriggerTemplate(template.Name, metav1.GetOptions{})
+	loaded, err := r.GetTriggerTemplate(template.Name)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,7 +46,7 @@ func TestGetClusterTriggerBinding(t *testing.T) {
 
 	r := NewVersionedClient(binding.Namespace, triggersClient)
 
-	loaded, err := r.GetClusterTriggerBinding(binding.Name, metav1.GetOptions{})
+	loaded, err := r.GetClusterTriggerBinding(binding.Name)
 	if err != nil {
 		t.Fatal(err)
 	}

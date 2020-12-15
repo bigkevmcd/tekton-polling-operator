@@ -2,6 +2,7 @@ package tekton
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	triggersv1 "github.com/tektoncd/triggers/pkg/apis/triggers/v1alpha1"
@@ -22,9 +23,11 @@ func New(c triggersclientset.Interface) *ResourceResolver {
 }
 
 func (r ResourceResolver) Resolve(ns string, bindings []*triggersv1.EventListenerBinding, tt triggersv1.EventListenerTemplate, commit git.Commit) ([]json.RawMessage, error) {
-	trigger := triggersv1.EventListenerTrigger{
-		Bindings: bindings,
-		Template: tt,
+	trigger := triggersv1.Trigger{
+		Spec: triggersv1.TriggerSpec{
+			Bindings: bindings,
+			Template: tt,
+		},
 	}
 	client := r.clientFactory(ns)
 	rt, err := template.ResolveTrigger(trigger,
@@ -32,14 +35,14 @@ func (r ResourceResolver) Resolve(ns string, bindings []*triggersv1.EventListene
 		client.GetClusterTriggerBinding,
 		client.GetTriggerTemplate)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to resolve trigger: %w", err)
 	}
 
 	payload, err := json.Marshal(commit)
 	if err != nil {
 		return nil, err
 	}
-	params, err := template.ResolveParams(rt, payload, http.Header{})
+	params, err := template.ResolveParams(rt, payload, http.Header{}, map[string]interface{}{})
 	if err != nil {
 		return nil, err
 	}
