@@ -183,3 +183,68 @@ func repoFromURL(s string) (string, string, error) {
 	endpoint := fmt.Sprintf("%s://%s", parsed.Scheme, host)
 	return strings.TrimPrefix(strings.TrimSuffix(parsed.Path, ".git"), "/"), endpoint, nil
 }
+
+func (r ReconcileRepository) createResources(triggerNS string, res []json.RawMessage, log *zap.SugaredLogger) error {
+	for _, rt := range res {
+		// Assume the TriggerResourceTemplate is valid (it has an apiVersion and Kind)
+		data := new(unstructured.Unstructured)
+		if err := data.UnmarshalJSON(rt); err != nil {
+			return fmt.Errorf("couldn't unmarshal json: %v", err)
+		}
+
+		// TODO: add some labels to indicate the source repository/commit etc.
+
+		namespace := data.GetNamespace()
+		// Default the resource creation to the EventListenerNamespace if not found in the resource template
+		if namespace == "" {
+			namespace = triggerNS
+		}
+
+		// Resolve resource kind to the underlying API Resource type.
+		apiResource, err := findAPIResource(data.GetAPIVersion(), data.GetKind(), r.client)
+		if err != nil {
+			return fmt.Errorf("couldn't find API resource for json: %v", err)
+		}
+
+		name := data.GetName()
+		if name == "" {
+			name = data.GetGenerateName()
+		}
+		logger.Infof("Generating resource: kind: %s, name: %s", apiResource, name)
+		if _, err := r.client.Create(data); err != nil {
+			if kerrors.IsUnauthorized(err) || kerrors.IsForbidden(err) {
+				return err
+			}
+			return fmt.Errorf("couldn't create resource with group version kind %q: %v", gvr, err)
+		}
+		return nil
+
+	}
+	return nil
+}
+
+// findAPIResource returns the APIResource definition using the discovery client c.
+func findAPIResource(apiVersion, kind string, c client.Client) (*metav1.APIResource, error) {
+	resourceList, err := c.ServerResourcesForGroupVersion(apiVersion)
+	if err != nil {
+		return nil, fmt.Errorf("error getting kubernetes server resources for apiVersion %s: %s", apiVersion, err)
+	}
+	for i := range resourceList.APIResources {
+		r := &resourceList.APIResources[i]
+		if r.Kind != kind {
+			continue
+		}
+
+		// Resolve GroupVersion from parent list to have consistent resource identifiers.
+		if r.Version == "" || r.Group == "" {
+			gv, err := schema.ParseGroupVersion(resourceList.GroupVersion)
+			if err != nil {
+				return nil, fmt.Errorf("error parsing parsing GroupVersion: %v", err)
+			}
+			r.Group = gv.Group
+			r.Version = gv.Version
+		}
+		return r, nil
+	}
+	return nil, fmt.Errorf("error could not find resource with apiVersion %s and kind %s", apiVersion, kind)
+}
