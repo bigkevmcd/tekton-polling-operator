@@ -7,9 +7,9 @@ import (
 	"github.com/google/go-cmp/cmp"
 	pipelinev1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	triggersv1 "github.com/tektoncd/triggers/pkg/apis/triggers/v1alpha1"
-	triggersclientset "github.com/tektoncd/triggers/pkg/client/clientset/versioned"
-	fake "github.com/tektoncd/triggers/pkg/client/clientset/versioned/fake"
 	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -21,7 +21,7 @@ const testNS = "testing"
 func TestResolveWithKnownResources(t *testing.T) {
 	binding := makeBinding()
 	template := makeTemplate(t)
-	triggersClient := makeClient(binding, template)
+	triggersClient := makeClient(t, binding, template)
 
 	commit := map[string]interface{}{
 		"id": "1f18b9248b11b31a4dc5d36af4f8acadd5fbb76e",
@@ -45,7 +45,9 @@ func TestResolveWithKnownResources(t *testing.T) {
 
 	want := []map[string]interface{}{
 		{
-			"kind": "PipelineRun", "apiVersion": "tekton.dev/v1beta1", "metadata": map[string]interface{}{
+			"kind":       "PipelineRun",
+			"apiVersion": "tekton.dev/v1beta1",
+			"metadata": map[string]interface{}{
 				"name":              "test-pipeline-run",
 				"namespace":         "testing",
 				"creationTimestamp": nil},
@@ -62,14 +64,28 @@ func TestResolveWithKnownResources(t *testing.T) {
 }
 
 func TestResolveWithMissingResources(t *testing.T) {
-	t.Skip()
+	binding := makeBinding()
+	template := makeTemplate(t)
+	// the client is created without the binding.
+	triggersClient := makeClient(t, template)
+
+	commit := map[string]interface{}{
+		"id": "1f18b9248b11b31a4dc5d36af4f8acadd5fbb76e",
+	}
+	templateBinding := triggersv1.EventListenerTemplate{Name: template.Name}
+	r := New(triggersClient)
+
+	_, err := r.Resolve(testNS, makeEventListenerBindings(binding), templateBinding, commit)
+	if !matchError(t, "failed to resolve trigger: failed to resolve bindings", err) {
+		t.Fatal(err)
+	}
 }
 
 func makeEventListenerBindings(b *triggersv1.TriggerBinding) []*triggersv1.EventListenerBinding {
 	return []*triggersv1.EventListenerBinding{
 		{
 			Ref:  b.Name,
-			Kind: triggersv1.TriggerBindingKind(b.Kind),
+			Kind: triggersv1.NamespacedTriggerBindingKind,
 		},
 	}
 }
@@ -152,8 +168,15 @@ func makeClusterBinding() *triggersv1.ClusterTriggerBinding {
 	}
 }
 
-func makeClient(objs ...runtime.Object) triggersclientset.Interface {
-	return fake.NewSimpleClientset(objs...)
+func makeClient(t *testing.T, objs ...runtime.Object) client.Client {
+	s := runtime.NewScheme()
+	if err := pipelinev1.AddToScheme(s); err != nil {
+		t.Fatalf("failed to register pipelinev1 scheme: %s", err)
+	}
+	if err := triggersv1.AddToScheme(s); err != nil {
+		t.Fatalf("failed to register triggersv1 scheme: %s", err)
+	}
+	return fake.NewFakeClientWithScheme(s, objs...)
 }
 
 func mustMarshal(t *testing.T, v interface{}) []byte {

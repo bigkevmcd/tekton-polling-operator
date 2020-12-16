@@ -28,17 +28,8 @@ type RepositorySpec struct {
 
 // PipelineRef links to the Pipeline to execute.
 type PipelineRef struct {
-	Name      string  `json:"name"`
-	Namespace string  `json:"namespace,omitempty"`
-	Params    []Param `json:"params,omitempty"`
-
 	Bindings []*triggersv1.EventListenerBinding `json:"bindings"`
 	Template triggersv1.EventListenerTemplate   `json:"template"`
-}
-
-type Param struct {
-	Name       string `json:"name"`
-	Expression string `json:"expression"`
 }
 
 // SecretRef contains the information required to reference a single secret

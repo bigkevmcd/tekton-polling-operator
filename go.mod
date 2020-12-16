@@ -11,6 +11,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/tektoncd/pipeline v0.18.1
 	github.com/tektoncd/triggers v0.10.0
+	go.uber.org/zap v1.16.0
 	k8s.io/api v0.18.8
 	k8s.io/apimachinery v0.19.0
 	k8s.io/client-go v12.0.0+incompatible

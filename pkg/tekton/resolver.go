@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	triggersv1 "github.com/tektoncd/triggers/pkg/apis/triggers/v1alpha1"
-	triggersclientset "github.com/tektoncd/triggers/pkg/client/clientset/versioned"
 	"github.com/tektoncd/triggers/pkg/template"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/bigkevmcd/tekton-polling-operator/pkg/git"
 )
@@ -18,7 +18,7 @@ type ResourceResolver struct {
 }
 
 // New creates and returns a New ResourceResolver.
-func New(c triggersclientset.Interface) *ResourceResolver {
+func New(c client.Client) *ResourceResolver {
 	return &ResourceResolver{clientFactory: clientFactory(c)}
 }
 
@@ -29,11 +29,11 @@ func (r ResourceResolver) Resolve(ns string, bindings []*triggersv1.EventListene
 			Template: tt,
 		},
 	}
-	client := r.clientFactory(ns)
+	cf := r.clientFactory(ns)
 	rt, err := template.ResolveTrigger(trigger,
-		client.GetTriggerBinding,
-		client.GetClusterTriggerBinding,
-		client.GetTriggerTemplate)
+		cf.GetTriggerBinding,
+		cf.GetClusterTriggerBinding,
+		cf.GetTriggerTemplate)
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve trigger: %w", err)
 	}
@@ -50,8 +50,8 @@ func (r ResourceResolver) Resolve(ns string, bindings []*triggersv1.EventListene
 	return resources, nil
 }
 
-func clientFactory(c triggersclientset.Interface) func(string) ResolverClient {
+func clientFactory(c client.Client) func(string) ResolverClient {
 	return func(ns string) ResolverClient {
-		return NewVersionedClient(ns, c)
+		return NewClient(ns, c)
 	}
 }

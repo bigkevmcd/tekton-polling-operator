@@ -82,22 +82,6 @@ spec:
                           type: string
                       type: object
                     type: array
-                  name:
-                    type: string
-                  namespace:
-                    type: string
-                  params:
-                    items:
-                      properties:
-                        expression:
-                          type: string
-                        name:
-                          type: string
-                      required:
-                      - expression
-                      - name
-                      type: object
-                    type: array
                   template:
                     properties:
                       apiversion:
@@ -145,7 +129,6 @@ spec:
                     type: object
                 required:
                 - bindings
-                - name
                 - template
                 type: object
               ref:
