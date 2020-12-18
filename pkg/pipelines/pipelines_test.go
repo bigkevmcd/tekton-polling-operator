@@ -15,11 +15,12 @@ import (
 )
 
 const (
-	testPipelineName = "test-pipeline"
-	testPipelineRun  = "test-pipeline-run"
-	testRepoURL      = "https://github.com/example/example.git"
-	testSHA          = "35576600886452a3f0f2e9d459924865f4007614"
-	testNamespace    = "test-namespace"
+	testPipelineName       = "test-pipeline"
+	testPipelineRun        = "test-pipeline-run"
+	testRepoURL            = "https://github.com/example/example.git"
+	testSHA                = "35576600886452a3f0f2e9d459924865f4007614"
+	testNamespace          = "test-namespace"
+	testServiceAccountName = "test-sa"
 )
 
 var _ PipelineRunner = (*ClientPipelineRunner)(nil)
@@ -52,7 +53,7 @@ func TestRunPipelineCreatesPipelineRun(t *testing.T) {
 			},
 		},
 	}
-	_, err := r.Run(context.Background(), testPipelineName, testNamespace, params, resources)
+	_, err := r.Run(context.Background(), testPipelineName, testNamespace, testServiceAccountName, params, resources)
 
 	pr := &pipelinev1.PipelineRun{}
 	err = cl.Get(context.Background(), types.NamespacedName{
@@ -70,8 +71,9 @@ func TestRunPipelineCreatesPipelineRun(t *testing.T) {
 			ResourceVersion: "1",
 		},
 		Spec: pipelinev1.PipelineRunSpec{
-			Params:      params,
-			PipelineRef: &pipelinev1.PipelineRef{Name: testPipelineName},
+			Params:             params,
+			PipelineRef:        &pipelinev1.PipelineRef{Name: testPipelineName},
+			ServiceAccountName: testServiceAccountName,
 			Resources: []pipelinev1.PipelineResourceBinding{
 				{
 					Name: "testing",
