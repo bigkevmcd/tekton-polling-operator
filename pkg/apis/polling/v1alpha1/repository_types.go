@@ -59,6 +59,7 @@ type PollStatus struct {
 	Ref  string `json:"ref"`
 	SHA  string `json:"sha"`
 	ETag string `json:"etag"`
+	Tag  string `json:"tag"`
 }
 
 // Equal returns true if two PollStatus values match.

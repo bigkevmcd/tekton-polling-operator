@@ -1,0 +1,302 @@
+[
+  {
+    "name": "v1.8.0",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/v1.8.0",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/v1.8.0",
+    "commit": {
+      "sha": "6c8a85a5ab953874c7c83d50317359a0e5a352a9",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/6c8a85a5ab953874c7c83d50317359a0e5a352a9"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy92MS44LjA="
+  },
+  {
+    "name": "v1.7.0",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/v1.7.0",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/v1.7.0",
+    "commit": {
+      "sha": "18af1ea3a6c340c252e97b7875e929a97e7b0b8f",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/18af1ea3a6c340c252e97b7875e929a97e7b0b8f"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy92MS43LjA="
+  },
+  {
+    "name": "v1.6.0",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/v1.6.0",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/v1.6.0",
+    "commit": {
+      "sha": "44f588dd4c76ee5d78f7865ab016510c901096da",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/44f588dd4c76ee5d78f7865ab016510c901096da"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy92MS42LjA="
+  },
+  {
+    "name": "v1.4.2",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/v1.4.2",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/v1.4.2",
+    "commit": {
+      "sha": "d10ba4ac4312885a8ae6b70bbda5ac46202fe04e",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/d10ba4ac4312885a8ae6b70bbda5ac46202fe04e"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy92MS40LjI="
+  },
+  {
+    "name": "v1.4.1",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/v1.4.1",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/v1.4.1",
+    "commit": {
+      "sha": "cbf1d671dfc3e32157f15305aa9fbcd659c5ed5e",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/cbf1d671dfc3e32157f15305aa9fbcd659c5ed5e"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy92MS40LjE="
+  },
+  {
+    "name": "v1.4.0",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/v1.4.0",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/v1.4.0",
+    "commit": {
+      "sha": "ea93f3ed9faa7cc06ebcd0e44a7dc7e4b78e5d84",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/ea93f3ed9faa7cc06ebcd0e44a7dc7e4b78e5d84"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy92MS40LjA="
+  },
+  {
+    "name": "v1.3.1",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/v1.3.1",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/v1.3.1",
+    "commit": {
+      "sha": "4ed92717836ecad86ec3251887caf59f2678b8a1",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/4ed92717836ecad86ec3251887caf59f2678b8a1"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy92MS4zLjE="
+  },
+  {
+    "name": "v1.3.0",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/v1.3.0",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/v1.3.0",
+    "commit": {
+      "sha": "14ef95dac62abf1ab9335652ed50f6b35c6bb243",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/14ef95dac62abf1ab9335652ed50f6b35c6bb243"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy92MS4zLjA="
+  },
+  {
+    "name": "v1.2.1",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/v1.2.1",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/v1.2.1",
+    "commit": {
+      "sha": "97d36bd8bbb1ce989f182dde858de717261259c5",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/97d36bd8bbb1ce989f182dde858de717261259c5"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy92MS4yLjE="
+  },
+  {
+    "name": "v1.2.0",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/v1.2.0",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/v1.2.0",
+    "commit": {
+      "sha": "02e5f233d0f6301dbcf30a466659f34ca6e1c9aa",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/02e5f233d0f6301dbcf30a466659f34ca6e1c9aa"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy92MS4yLjA="
+  },
+  {
+    "name": "v1.1.1",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/v1.1.1",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/v1.1.1",
+    "commit": {
+      "sha": "457a56f71a793ee5a9ee148bbff79de68466aef0",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/457a56f71a793ee5a9ee148bbff79de68466aef0"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy92MS4xLjE="
+  },
+  {
+    "name": "v1.1.0",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/v1.1.0",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/v1.1.0",
+    "commit": {
+      "sha": "ff1fb39f434daa2fe3631e0c14421b140d90c83f",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/ff1fb39f434daa2fe3631e0c14421b140d90c83f"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy92MS4xLjA="
+  },
+  {
+    "name": "v1.0.0",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/v1.0.0",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/v1.0.0",
+    "commit": {
+      "sha": "ecd204b15ee1f071d35d72e37d69c76e33f920fe",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/ecd204b15ee1f071d35d72e37d69c76e33f920fe"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy92MS4wLjA="
+  },
+  {
+    "name": "v0.5.0",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/v0.5.0",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/v0.5.0",
+    "commit": {
+      "sha": "70b0e925551c26251dae746c14bdc7c5869d9829",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/70b0e925551c26251dae746c14bdc7c5869d9829"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy92MC41LjA="
+  },
+  {
+    "name": "v0.4.0",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/v0.4.0",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/v0.4.0",
+    "commit": {
+      "sha": "82f2f9ecf97bd2cc48751deff9d9a7660f3341dd",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/82f2f9ecf97bd2cc48751deff9d9a7660f3341dd"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy92MC40LjA="
+  },
+  {
+    "name": "5.1.2",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/5.1.2",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/5.1.2",
+    "commit": {
+      "sha": "855f7724be13f6146f61a893851522837ad5b634",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/855f7724be13f6146f61a893851522837ad5b634"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy81LjEuMg=="
+  },
+  {
+    "name": "5.1.1",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/5.1.1",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/5.1.1",
+    "commit": {
+      "sha": "9f4d31a8c4fe619c13684ac232465817e8bd5829",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/9f4d31a8c4fe619c13684ac232465817e8bd5829"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy81LjEuMQ=="
+  },
+  {
+    "name": "5.1.0",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/5.1.0",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/5.1.0",
+    "commit": {
+      "sha": "b13ec2ddb454db3f2704a0434b413d34a5074613",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/b13ec2ddb454db3f2704a0434b413d34a5074613"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy81LjEuMA=="
+  },
+  {
+    "name": "5.0.3",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/5.0.3",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/5.0.3",
+    "commit": {
+      "sha": "7638417db6d59f3c431d3e1f261cc637155684cd",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/95be17be1dc2103eb5e2c0b0bac50ef692c4657d"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy81LjAuMw=="
+  },
+  {
+    "name": "5.0.2",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/5.0.2",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/5.0.2",
+    "commit": {
+      "sha": "6596ed08de58bffc6982512a0483be3b2ec346ce",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/6596ed08de58bffc6982512a0483be3b2ec346ce"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy81LjAuMg=="
+  },
+  {
+    "name": "5.0.1",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/5.0.1",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/5.0.1",
+    "commit": {
+      "sha": "7411da595c25183daba255068814b83843fe3395",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/7411da595c25183daba255068814b83843fe3395"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy81LjAuMQ=="
+  },
+  {
+    "name": "5.0.0",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/5.0.0",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/5.0.0",
+    "commit": {
+      "sha": "9299a2d1f300267354609bee398caa2cb5548594",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/9299a2d1f300267354609bee398caa2cb5548594"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy81LjAuMA=="
+  },
+  {
+    "name": "4.0.6",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/4.0.6",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/4.0.6",
+    "commit": {
+      "sha": "26a630c0b4b3452833d96c511d93f6f2d2e90a99",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/26a630c0b4b3452833d96c511d93f6f2d2e90a99"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy80LjAuNg=="
+  },
+  {
+    "name": "4.0.5",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/4.0.5",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/4.0.5",
+    "commit": {
+      "sha": "f43f9b2eb6766e07f318d266a99d2ec7c940b0cf",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/f43f9b2eb6766e07f318d266a99d2ec7c940b0cf"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy80LjAuNQ=="
+  },
+  {
+    "name": "4.0.4",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/4.0.4",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/4.0.4",
+    "commit": {
+      "sha": "b98a9dcc1a47770206ec17040ca1a57a7b91cdc6",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/b98a9dcc1a47770206ec17040ca1a57a7b91cdc6"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy80LjAuNA=="
+  },
+  {
+    "name": "4.0.3",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/4.0.3",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/4.0.3",
+    "commit": {
+      "sha": "a2f9216fe43849c3b4844032771ba632307d8738",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/a2f9216fe43849c3b4844032771ba632307d8738"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy80LjAuMw=="
+  },
+  {
+    "name": "4.0.2",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/4.0.2",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/4.0.2",
+    "commit": {
+      "sha": "b4138fdb4dce7b34b6fc46069f70bb295aa8963c",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/b4138fdb4dce7b34b6fc46069f70bb295aa8963c"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy80LjAuMg=="
+  },
+  {
+    "name": "4.0.1",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/4.0.1",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/4.0.1",
+    "commit": {
+      "sha": "113360052b3153e439a0cf8de76b8e3d2a7bdf27",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/113360052b3153e439a0cf8de76b8e3d2a7bdf27"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy80LjAuMQ=="
+  },
+  {
+    "name": "4.0.0",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/4.0.0",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/4.0.0",
+    "commit": {
+      "sha": "ab953493ee14c3c9800bda0251e0c507f9741408",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/ab953493ee14c3c9800bda0251e0c507f9741408"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy80LjAuMA=="
+  },
+  {
+    "name": "3.3.1",
+    "zipball_url": "https://api.github.com/repos/stefanprodan/podinfo/zipball/3.3.1",
+    "tarball_url": "https://api.github.com/repos/stefanprodan/podinfo/tarball/3.3.1",
+    "commit": {
+      "sha": "b45cc753291a9bfb9604a596ae709dd775f52a98",
+      "url": "https://api.github.com/repos/stefanprodan/podinfo/commits/b45cc753291a9bfb9604a596ae709dd775f52a98"
+    },
+    "node_id": "MDM6UmVmMTE2MzkyNTkwOnJlZnMvdGFncy8zLjMuMQ=="
+  }
+]
