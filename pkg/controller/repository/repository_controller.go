@@ -137,13 +137,14 @@ func (r *ReconcileRepository) Reconcile(req reconcile.Request) (reconcile.Result
 	if runNS == "" {
 		runNS = req.Namespace
 	}
+	serviceAccountName := repo.Spec.Pipeline.ServiceAccountName
 
 	params, err := makeParams(commit, repo.Spec)
 	if err != nil {
 		reqLogger.Error(err, "failed to parse the parameters")
 		return reconcile.Result{}, err
 	}
-	pr, err := r.pipelineRunner.Run(ctx, repo.Spec.Pipeline.Name, runNS, params, repo.Spec.Pipeline.Resources)
+	pr, err := r.pipelineRunner.Run(ctx, repo.Spec.Pipeline.Name, runNS, serviceAccountName, params, repo.Spec.Pipeline.Resources)
 	if err != nil {
 		reqLogger.Error(err, "failed to create a PipelineRun", "pipelineName", repo.Spec.Pipeline.Name)
 		return reconcile.Result{}, err

@@ -29,10 +29,11 @@ type RepositorySpec struct {
 
 // PipelineRef links to the Pipeline to execute.
 type PipelineRef struct {
-	Name      string                               `json:"name"`
-	Namespace string                               `json:"namespace,omitempty"`
-	Params    []Param                              `json:"params,omitempty"`
-	Resources []pipelinev1.PipelineResourceBinding `json:"resources,omitempty"`
+	Name               string                               `json:"name"`
+	Namespace          string                               `json:"namespace,omitempty"`
+	ServiceAccountName string                               `json:"serviceAccountName,omitempty"`
+	Params             []Param                              `json:"params,omitempty"`
+	Resources          []pipelinev1.PipelineResourceBinding `json:"resources,omitempty"`
 }
 
 type Param struct {

@@ -36,6 +36,7 @@ const (
 	testCommitSHA           = "24317a55785cd98d6c9bf50a5204bc6be17e7316"
 	testCommitETag          = `W/"878f43039ad0553d0d3122d8bc171b01"`
 	testPipelineName        = "test-pipeline"
+	testServiceAccountName  = "test-sa"
 )
 
 var (
@@ -65,6 +66,7 @@ func TestReconcileRepositoryWithEmptyPollState(t *testing.T) {
 	fatalIfError(t, err)
 	r.pipelineRunner.(*pipelines.MockRunner).AssertPipelineRun(
 		testPipelineName, testRepositoryNamespace,
+		testServiceAccountName,
 		makeTestParams(map[string]string{"one": testRepoURL, "two": "main"}),
 		testResources)
 
@@ -104,6 +106,7 @@ func TestReconcileRepositoryInPipelineNamespace(t *testing.T) {
 	fatalIfError(t, err)
 	r.pipelineRunner.(*pipelines.MockRunner).AssertPipelineRun(
 		testPipelineName, pipelineNS,
+		testServiceAccountName,
 		makeTestParams(map[string]string{"one": testRepoURL, "two": "main"}),
 		testResources)
 
@@ -300,7 +303,8 @@ func makeRepository(opts ...func(*pollingv1.Repository)) *pollingv1.Repository {
 			Type:      pollingv1.GitHub,
 			Frequency: &metav1.Duration{Duration: testFrequency},
 			Pipeline: pollingv1.PipelineRef{
-				Name: testPipelineName,
+				Name:               testPipelineName,
+				ServiceAccountName: testServiceAccountName,
 				Params: []pollingv1.Param{
 					{Name: "one", Expression: "repoURL"},
 					{Name: "two", Expression: "commit.id"},
