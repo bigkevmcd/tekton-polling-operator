@@ -34,6 +34,7 @@ type PipelineRef struct {
 	ServiceAccountName string                               `json:"serviceAccountName,omitempty"`
 	Params             []Param                              `json:"params,omitempty"`
 	Resources          []pipelinev1.PipelineResourceBinding `json:"resources,omitempty"`
+	Workspaces         []pipelinev1.WorkspaceBinding        `json:"workspaces,omitempty"`
 }
 
 type Param struct {

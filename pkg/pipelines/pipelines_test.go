@@ -6,6 +6,8 @@ import (
 
 	pipelinev1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	resourcev1alpha1 "github.com/tektoncd/pipeline/pkg/apis/resource/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -53,7 +55,13 @@ func TestRunPipelineCreatesPipelineRun(t *testing.T) {
 			},
 		},
 	}
-	_, err := r.Run(context.Background(), testPipelineName, testNamespace, testServiceAccountName, params, resources)
+	workspaces := []pipelinev1.WorkspaceBinding{
+		{
+			Name:                  "test-workspace",
+			PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{ClaimName: "test-pvc"},
+		},
+	}
+	_, err := r.Run(context.Background(), testPipelineName, testNamespace, testServiceAccountName, params, resources, workspaces)
 
 	pr := &pipelinev1.PipelineRun{}
 	err = cl.Get(context.Background(), types.NamespacedName{
@@ -85,6 +93,12 @@ func TestRunPipelineCreatesPipelineRun(t *testing.T) {
 							},
 						},
 					},
+				},
+			},
+			Workspaces: []pipelinev1.WorkspaceBinding{
+				{
+					Name:                  "test-workspace",
+					PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{ClaimName: "test-pvc"},
 				},
 			},
 		},

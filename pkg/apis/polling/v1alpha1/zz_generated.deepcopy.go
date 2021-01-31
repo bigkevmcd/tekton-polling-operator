@@ -58,6 +58,13 @@ func (in *PipelineRef) DeepCopyInto(out *PipelineRef) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.Workspaces != nil {
+		in, out := &in.Workspaces, &out.Workspaces
+		*out = make([]v1beta1.WorkspaceBinding, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
+	}
 	return
 }
 

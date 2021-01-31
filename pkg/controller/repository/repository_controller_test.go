@@ -42,7 +42,13 @@ const (
 var (
 	_ reconcile.Reconciler = &ReconcileRepository{}
 
-	testResources = []pipelinev1beta1.PipelineResourceBinding{{Name: "testing"}}
+	testResources  = []pipelinev1beta1.PipelineResourceBinding{{Name: "testing"}}
+	testWorkspaces = []pipelinev1beta1.WorkspaceBinding{
+		{
+			Name:                  "test-workspace",
+			PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{ClaimName: "test-pvc"},
+		},
+	}
 )
 
 func TestReconcileRepositoryWithEmptyPollState(t *testing.T) {
@@ -68,7 +74,7 @@ func TestReconcileRepositoryWithEmptyPollState(t *testing.T) {
 		testPipelineName, testRepositoryNamespace,
 		testServiceAccountName,
 		makeTestParams(map[string]string{"one": testRepoURL, "two": "main"}),
-		testResources)
+		testResources, testWorkspaces)
 
 	wantStatus := pollingv1.RepositoryStatus{
 		PollStatus: pollingv1.PollStatus{
@@ -108,7 +114,7 @@ func TestReconcileRepositoryInPipelineNamespace(t *testing.T) {
 		testPipelineName, pipelineNS,
 		testServiceAccountName,
 		makeTestParams(map[string]string{"one": testRepoURL, "two": "main"}),
-		testResources)
+		testResources, testWorkspaces)
 
 	wantStatus := pollingv1.RepositoryStatus{
 		PollStatus: pollingv1.PollStatus{
@@ -309,7 +315,8 @@ func makeRepository(opts ...func(*pollingv1.Repository)) *pollingv1.Repository {
 					{Name: "one", Expression: "repoURL"},
 					{Name: "two", Expression: "commit.id"},
 				},
-				Resources: testResources,
+				Resources:  testResources,
+				Workspaces: testWorkspaces,
 			},
 		},
 		Status: pollingv1.RepositoryStatus{},
