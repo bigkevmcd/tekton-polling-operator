@@ -9,5 +9,5 @@ import (
 // PipelineRunner executes a pipeline by name, creating a PipelineRun with the
 // correct params and resource bindings.
 type PipelineRunner interface {
-	Run(ctx context.Context, pipelineName, ns, serviceAccountName string, params []pipelinev1.Param, res []pipelinev1.PipelineResourceBinding) (*pipelinev1.PipelineRun, error)
+	Run(ctx context.Context, pipelineName, ns, serviceAccountName string, params []pipelinev1.Param, res []pipelinev1.PipelineResourceBinding, ws []pipelinev1.WorkspaceBinding) (*pipelinev1.PipelineRun, error)
 }
