@@ -42,7 +42,7 @@ const (
 var (
 	_ reconcile.Reconciler = &ReconcileRepository{}
 
-	testResources  = []pipelinev1beta1.PipelineResourceBinding{{Name: "testing"}}
+	testResources = []pipelinev1beta1.PipelineResourceBinding{{Name: "testing"}}
 	testWorkspaces = []pipelinev1beta1.WorkspaceBinding{
 		{
 			Name:                  "test-workspace",
