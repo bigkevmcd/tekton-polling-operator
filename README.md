@@ -165,6 +165,23 @@ spec:
           value: $(params.repoURL)
 ```
 
+## Local Development
+
+This uses the operator-sdk, and hasn't yet been upgraded to work with newer
+versions than v0.19
+
+### Running tests
+
+```shell
+$ go test -v ./...
+```
+
+### Building an image
+
+```shell
+$ operator-sdk build <docker image reference> # This requires pre-v1.0.0 of the operator-sdk
+```
+
 ## FAQ
 
 ### Do you support TriggerBindings and TriggerTemplates?
