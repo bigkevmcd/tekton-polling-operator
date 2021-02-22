@@ -3,10 +3,8 @@ package pipelines
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	pipelinev1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
-	resourcev1alpha1 "github.com/tektoncd/pipeline/pkg/apis/resource/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -32,8 +30,8 @@ type ClientPipelineRunner struct {
 
 // Run is an implementation of the PipelineRunner interface.
 // TODO: This should replaced by TriggerTemplates/TriggerBindings.
-func (c *ClientPipelineRunner) Run(ctx context.Context, pipelineName, ns, serviceAccountName string, params []pipelinev1.Param, res []pipelinev1.PipelineResourceBinding, ws []pipelinev1.WorkspaceBinding) (*pipelinev1.PipelineRun, error) {
-	pr := c.makePipelineRun(pipelineName, serviceAccountName, ns, params, res, ws)
+func (c *ClientPipelineRunner) Run(ctx context.Context, pipelineName, ns string, params []pipelinev1.Param) (*pipelinev1.PipelineRun, error) {
+	pr := c.makePipelineRun(pipelineName, ns, params)
 	err := c.client.Create(ctx, pr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a pipeline run for pipeline %s: %w", pipelineName, err)
@@ -41,16 +39,13 @@ func (c *ClientPipelineRunner) Run(ctx context.Context, pipelineName, ns, servic
 	return pr, nil
 }
 
-func (c *ClientPipelineRunner) makePipelineRun(pipelineName, serviceAccountName, ns string, params []pipelinev1.Param, res []pipelinev1.PipelineResourceBinding, ws []pipelinev1.WorkspaceBinding) *pipelinev1.PipelineRun {
+func (c *ClientPipelineRunner) makePipelineRun(pipelineName, ns string, params []pipelinev1.Param) *pipelinev1.PipelineRun {
 	return &pipelinev1.PipelineRun{
 		TypeMeta:   pipelineRunMeta,
 		ObjectMeta: c.objectMeta(ns),
 		Spec: pipelinev1.PipelineRunSpec{
-			PipelineRef:        &pipelinev1.PipelineRef{Name: pipelineName},
-			ServiceAccountName: serviceAccountName,
-			Params:             params,
-			Resources:          applyReplacements(res, params),
-			Workspaces:         ws,
+			PipelineRef: &pipelinev1.PipelineRef{Name: pipelineName},
+			Params:      params,
 		},
 	}
 }
@@ -62,28 +57,4 @@ func objectMetaCreator(ns string) metav1.ObjectMeta {
 		GenerateName: pipelineRunNames,
 		Namespace:    ns,
 	}
-}
-
-func applyReplacements(res []pipelinev1.PipelineResourceBinding, params []pipelinev1.Param) []pipelinev1.PipelineResourceBinding {
-	updated := []pipelinev1.PipelineResourceBinding{}
-	for _, r := range res {
-		newParams := []resourcev1alpha1.ResourceParam{}
-		for _, p := range r.ResourceSpec.Params {
-			newParams = append(newParams, patchParam(params, p))
-		}
-		r.ResourceSpec.Params = newParams
-		updated = append(updated, r)
-	}
-	return updated
-}
-
-// TODO: This is a grim hack - drop support for resources again.
-func patchParam(params []pipelinev1.Param, param resourcev1alpha1.ResourceParam) resourcev1alpha1.ResourceParam {
-	for _, p := range params {
-		replace := fmt.Sprintf("$(params.%s)", p.Name)
-		if p.Value.Type == "string" {
-			param.Value = strings.ReplaceAll(param.Value, replace, p.Value.StringVal)
-		}
-	}
-	return param
 }

@@ -5,9 +5,6 @@ import (
 	"testing"
 
 	pipelinev1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
-	resourcev1alpha1 "github.com/tektoncd/pipeline/pkg/apis/resource/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -17,12 +14,11 @@ import (
 )
 
 const (
-	testPipelineName       = "test-pipeline"
-	testPipelineRun        = "test-pipeline-run"
-	testRepoURL            = "https://github.com/example/example.git"
-	testSHA                = "35576600886452a3f0f2e9d459924865f4007614"
-	testNamespace          = "test-namespace"
-	testServiceAccountName = "test-sa"
+	testPipelineName = "test-pipeline"
+	testPipelineRun  = "test-pipeline-run"
+	testRepoURL      = "https://github.com/example/example.git"
+	testSHA          = "35576600886452a3f0f2e9d459924865f4007614"
+	testNamespace    = "test-namespace"
 )
 
 var _ PipelineRunner = (*ClientPipelineRunner)(nil)
@@ -42,26 +38,7 @@ func TestRunPipelineCreatesPipelineRun(t *testing.T) {
 	params := []pipelinev1.Param{
 		{Name: "test", Value: *pipelinev1.NewArrayOrString("value")},
 	}
-	resources := []pipelinev1.PipelineResourceBinding{
-		{
-			Name: "testing",
-			ResourceSpec: &resourcev1alpha1.PipelineResourceSpec{
-				Params: []resourcev1alpha1.ResourceParam{
-					{
-						Name:  "testing",
-						Value: "$(params.test)",
-					},
-				},
-			},
-		},
-	}
-	workspaces := []pipelinev1.WorkspaceBinding{
-		{
-			Name:                  "test-workspace",
-			PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{ClaimName: "test-pvc"},
-		},
-	}
-	_, err := r.Run(context.Background(), testPipelineName, testNamespace, testServiceAccountName, params, resources, workspaces)
+	_, err := r.Run(context.Background(), testPipelineName, testNamespace, params)
 
 	pr := &pipelinev1.PipelineRun{}
 	err = cl.Get(context.Background(), types.NamespacedName{
@@ -79,71 +56,12 @@ func TestRunPipelineCreatesPipelineRun(t *testing.T) {
 			ResourceVersion: "1",
 		},
 		Spec: pipelinev1.PipelineRunSpec{
-			Params:             params,
-			PipelineRef:        &pipelinev1.PipelineRef{Name: testPipelineName},
-			ServiceAccountName: testServiceAccountName,
-			Resources: []pipelinev1.PipelineResourceBinding{
-				{
-					Name: "testing",
-					ResourceSpec: &resourcev1alpha1.PipelineResourceSpec{
-						Params: []resourcev1alpha1.ResourceParam{
-							{
-								Name:  "testing",
-								Value: "value",
-							},
-						},
-					},
-				},
-			},
-			Workspaces: []pipelinev1.WorkspaceBinding{
-				{
-					Name:                  "test-workspace",
-					PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{ClaimName: "test-pvc"},
-				},
-			},
+			Params:      params,
+			PipelineRef: &pipelinev1.PipelineRef{Name: testPipelineName},
 		},
 	}
 
 	if diff := cmp.Diff(pr, want); diff != "" {
 		t.Fatalf("got an incorrect PipelineRun back:\n%s", diff)
-	}
-}
-
-func TestApplyReplacements(t *testing.T) {
-	resources := []pipelinev1.PipelineResourceBinding{
-		{
-			Name: "testing",
-			ResourceSpec: &resourcev1alpha1.PipelineResourceSpec{
-				Params: []resourcev1alpha1.ResourceParam{
-					{
-						Name:  "testing",
-						Value: "$(params.test)",
-					},
-				},
-			},
-		},
-	}
-	params := []pipelinev1.Param{
-		{Name: "test", Value: *pipelinev1.NewArrayOrString("value")},
-	}
-
-	replacements := applyReplacements(resources, params)
-
-	want := []pipelinev1.PipelineResourceBinding{
-		{
-			Name: "testing",
-			ResourceSpec: &resourcev1alpha1.PipelineResourceSpec{
-				Params: []resourcev1alpha1.ResourceParam{
-					{
-						Name:  "testing",
-						Value: "value",
-					},
-				},
-			},
-		},
-	}
-
-	if diff := cmp.Diff(want, replacements); diff != "" {
-		t.Fatalf("applyReplacements:\n%s", diff)
 	}
 }

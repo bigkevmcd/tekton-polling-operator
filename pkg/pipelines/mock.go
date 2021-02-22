@@ -24,23 +24,20 @@ type MockRunner struct {
 }
 
 type run struct {
-	serviceAccountName string
-	params             []pipelinev1.Param
-	resources          []pipelinev1.PipelineResourceBinding
-	workspaces         []pipelinev1.WorkspaceBinding
+	params []pipelinev1.Param
 }
 
 // Run is an implementation of the PipelineRunner interface.
-func (m *MockRunner) Run(ctx context.Context, pipelineName, ns, serviceAccountName string, params []pipelinev1.Param, res []pipelinev1.PipelineResourceBinding, ws []pipelinev1.WorkspaceBinding) (*pipelinev1.PipelineRun, error) {
+func (m *MockRunner) Run(ctx context.Context, pipelineName, ns string, params []pipelinev1.Param) (*pipelinev1.PipelineRun, error) {
 	if m.runError != nil {
 		return nil, m.runError
 	}
-	m.runs[mockKey(ns, pipelineName)] = run{serviceAccountName: serviceAccountName, params: params, resources: res, workspaces: ws}
+	m.runs[mockKey(ns, pipelineName)] = run{params: params}
 	return &pipelinev1.PipelineRun{}, nil
 }
 
 // AssertPipelineRun ensures that the pipeline run was triggered.
-func (m *MockRunner) AssertPipelineRun(pipelineName, ns string, serviceAccountName string, wantParams []pipelinev1.Param, wantResources []pipelinev1.PipelineResourceBinding, wantWorkspaces []pipelinev1.WorkspaceBinding) {
+func (m *MockRunner) AssertPipelineRun(pipelineName, ns string, wantParams []pipelinev1.Param) {
 	m.t.Helper()
 	run, ok := m.runs[mockKey(ns, pipelineName)]
 	if !ok {
@@ -48,18 +45,6 @@ func (m *MockRunner) AssertPipelineRun(pipelineName, ns string, serviceAccountNa
 	}
 	if diff := cmp.Diff(wantParams, run.params); diff != "" {
 		m.t.Fatalf("incorrect params for pipelinerun:\n%s", diff)
-	}
-
-	if diff := cmp.Diff(wantResources, run.resources); diff != "" {
-		m.t.Fatalf("incorrect resources for pipeline run:\n%s", diff)
-	}
-
-	if diff := cmp.Diff(serviceAccountName, run.serviceAccountName); diff != "" {
-		m.t.Fatalf("incorrect serviceAccountName for pipeline run:\n%s", diff)
-	}
-
-	if diff := cmp.Diff(wantWorkspaces, run.workspaces); diff != "" {
-		m.t.Fatalf("incorrect workspaces for pipeline run:\n%s", diff)
 	}
 }
 

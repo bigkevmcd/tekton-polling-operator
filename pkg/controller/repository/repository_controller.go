@@ -2,12 +2,17 @@ package repository
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	syslog "log"
 	"net/http"
 	"net/url"
 	"strings"
 
+	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/api/errors"
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -18,12 +23,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	pollingv1 "github.com/bigkevmcd/tekton-polling-operator/pkg/apis/polling/v1alpha1"
-	"github.com/bigkevmcd/tekton-polling-operator/pkg/cel"
 	"github.com/bigkevmcd/tekton-polling-operator/pkg/git"
-	"github.com/bigkevmcd/tekton-polling-operator/pkg/pipelines"
 	"github.com/bigkevmcd/tekton-polling-operator/pkg/secrets"
+	"github.com/bigkevmcd/tekton-polling-operator/pkg/tekton"
 	"github.com/go-logr/logr"
-	pipelinev1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -42,9 +45,8 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 		pollerFactory: func(repo *pollingv1.Repository, endpoint, token string) git.CommitPoller {
 			return makeCommitPoller(repo, endpoint, token)
 		},
-		pipelineRunner: pipelines.NewRunner(mgr.GetClient()),
-		secretGetter:   secrets.New(mgr.GetClient()),
-		log:            logf.Log.WithName("controller_repository"),
+		secretGetter: secrets.New(mgr.GetClient()),
+		log:          logf.Log.WithName("controller_repository"),
 	}
 }
 
@@ -68,10 +70,8 @@ type ReconcileRepository struct {
 	scheme *runtime.Scheme
 	// The poller polls the endpoint for the repo.
 	pollerFactory commitPollerFactory
-	// The pipelineRunner executes the named pipeline with appropriate params.
-	pipelineRunner pipelines.PipelineRunner
-	secretGetter   secrets.SecretGetter
-	log            logr.Logger
+	secretGetter  secrets.SecretGetter
+	log           logr.Logger
 }
 
 // Reconcile reads that state of the cluster for a Repository object and makes changes based on the state read
@@ -133,58 +133,33 @@ func (r *ReconcileRepository) Reconcile(req reconcile.Request) (reconcile.Result
 		reqLogger.Error(err, "unable to update Repository status")
 		return reconcile.Result{}, err
 	}
-	runNS := repo.Spec.Pipeline.Namespace
-	if runNS == "" {
-		runNS = req.Namespace
-	}
-	serviceAccountName := repo.Spec.Pipeline.ServiceAccountName
-	workspaces := repo.Spec.Pipeline.Workspaces
 
-	params, err := makeParams(commit, repo.Spec)
+	resolver := tekton.New(r.client)
+	resources, err := resolver.Resolve(req.Namespace, repo.Spec.Pipeline.Bindings, repo.Spec.Pipeline.Template, commit)
 	if err != nil {
-		reqLogger.Error(err, "failed to parse the parameters")
+		reqLogger.Error(err, "failed to create resolve resources")
 		return reconcile.Result{}, err
 	}
-	pr, err := r.pipelineRunner.Run(ctx, repo.Spec.Pipeline.Name, runNS, serviceAccountName, params, repo.Spec.Pipeline.Resources, workspaces)
-	if err != nil {
-		reqLogger.Error(err, "failed to create a PipelineRun", "pipelineName", repo.Spec.Pipeline.Name)
-		return reconcile.Result{}, err
-	}
-	reqLogger.Info("PipelineRun created", "name", pr.ObjectMeta.Name)
+	syslog.Printf("KEVIN!!!!! %s\n", resources)
+	// reqLogger.Info("PipelineRun created", "name", pr.ObjectMeta.Name)
 	reqLogger.Info("Requeueing next check", "frequency", repo.GetFrequency())
 	return reconcile.Result{RequeueAfter: repo.GetFrequency()}, nil
 }
 
 func (r *ReconcileRepository) authTokenForRepo(ctx context.Context, logger logr.Logger, namespace string, repo *pollingv1.Repository) (string, error) {
-	if repo.Spec.Auth == nil {
+	if repo.Spec.SecretRef == nil {
 		return "", nil
 	}
 	key := "token"
-	if repo.Spec.Auth.Key != "" {
-		key = repo.Spec.Auth.Key
+	if repo.Spec.SecretRef.SecretKey != "" {
+		key = repo.Spec.SecretRef.SecretKey
 	}
-	authToken, err := r.secretGetter.SecretToken(ctx, types.NamespacedName{Name: repo.Spec.Auth.Name, Namespace: namespace}, key)
+	authToken, err := r.secretGetter.SecretToken(ctx, types.NamespacedName{Name: repo.Spec.SecretRef.SecretName, Namespace: namespace}, key)
 	if err != nil {
-		logger.Error(err, "Getting the auth token failed", "name", repo.Spec.Auth.Name, "namespace", namespace, "key", key)
+		logger.Error(err, "Getting the auth token failed", "name", repo.Spec.SecretRef.SecretName, "namespace", namespace, "key", key)
 		return "", err
 	}
 	return authToken, nil
-}
-
-func makeParams(commit git.Commit, spec pollingv1.RepositorySpec) ([]pipelinev1.Param, error) {
-	celctx, err := cel.New(spec.URL, commit)
-	if err != nil {
-		return nil, err
-	}
-	params := []pipelinev1.Param{}
-	for _, v := range spec.Pipeline.Params {
-		val, err := celctx.EvaluateToParamValue(v.Expression)
-		if err != nil {
-			return nil, err
-		}
-		params = append(params, pipelinev1.Param{Name: v.Name, Value: *val})
-	}
-	return params, nil
 }
 
 // TODO: create an HTTP client that has appropriate timeouts.
@@ -211,4 +186,36 @@ func repoFromURL(s string) (string, string, error) {
 	}
 	endpoint := fmt.Sprintf("%s://%s", parsed.Scheme, host)
 	return strings.TrimPrefix(strings.TrimSuffix(parsed.Path, ".git"), "/"), endpoint, nil
+}
+
+func (r ReconcileRepository) createResources(ctx context.Context, triggerNS string, res []json.RawMessage, log *zap.SugaredLogger) error {
+	for _, rt := range res {
+		// Assume the TriggerResourceTemplate is valid (it has an apiVersion and Kind)
+		data := new(unstructured.Unstructured)
+		if err := data.UnmarshalJSON(rt); err != nil {
+			return fmt.Errorf("couldn't unmarshal json: %v", err)
+		}
+
+		// TODO: add some labels to indicate the source repository/commit etc.
+
+		namespace := data.GetNamespace()
+		// Default the resource creation to the EventListenerNamespace if not found in the resource template
+		if namespace == "" {
+			namespace = triggerNS
+		}
+
+		name := data.GetName()
+		if name == "" {
+			name = data.GetGenerateName()
+		}
+		if err := r.client.Create(ctx, data); err != nil {
+			if kerrors.IsUnauthorized(err) || kerrors.IsForbidden(err) {
+				return err
+			}
+			return fmt.Errorf("couldn't create resource with group version kind %q: %v", data.GroupVersionKind(), err)
+		}
+		return nil
+
+	}
+	return nil
 }
