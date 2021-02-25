@@ -2,6 +2,10 @@
 
 A simple git repository poller.
 
+This is a Git repository poller that detects changes in a Git repository, and triggers the execution of a Tekton PipelineRun.
+
+When polling GitHub, it uses a special endpoint that should not consume any API tokens, and the schedule can be configured per repository.
+
 ## Installation
 
 This operator requires Tekton Pipelines to be installed first, the installation
