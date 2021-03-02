@@ -76,6 +76,7 @@ spec:
   frequency: 5m
   type: github # can also be gitlab
   pipelineRef:
+    serviceAccountName: demo-sa # Optional ServiceAccount to execute the pipeline
     name: github-poll-pipeline
     namespace: test-ns # optional: if provided, the pipelinerun will be created in this namespace to reference the pipeline.
     params:
