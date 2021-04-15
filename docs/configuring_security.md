@@ -20,6 +20,13 @@ rules:
   - pipelineruns
   verbs:
   - create
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - get
+  - update
 ```
 
 This is a simple cluster role that only grants permission to create
