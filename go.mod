@@ -3,32 +3,28 @@ module github.com/bigkevmcd/tekton-polling-operator
 go 1.14
 
 require (
-	github.com/go-logr/logr v0.1.0
-	github.com/golang/protobuf v1.4.2
-	github.com/google/cel-go v0.5.1
-	github.com/google/go-cmp v0.5.2
-	github.com/operator-framework/operator-sdk v0.17.1
+	github.com/go-logr/logr v0.4.0
+	github.com/golang/protobuf v1.4.3
+	github.com/google/cel-go v0.6.0
+	github.com/google/go-cmp v0.5.4
+	github.com/operator-framework/operator-sdk v0.19.4
 	github.com/spf13/pflag v1.0.5
-	github.com/tektoncd/pipeline v0.18.1
-	k8s.io/api v0.18.8
-	k8s.io/apimachinery v0.19.0
+	github.com/tektoncd/pipeline v0.23.0
+	k8s.io/api v0.19.7
+	k8s.io/apimachinery v0.19.7
 	k8s.io/client-go v12.0.0+incompatible
-	sigs.k8s.io/controller-runtime v0.5.2
+	sigs.k8s.io/controller-runtime v0.6.0
 )
 
-// Knative deps (release-0.15)
+// Knative deps (release-0.20)
 replace (
-	contrib.go.opencensus.io/exporter/stackdriver => contrib.go.opencensus.io/exporter/stackdriver v0.12.9-0.20191108183826-59d068f8d8ff
+	contrib.go.opencensus.io/exporter/stackdriver => contrib.go.opencensus.io/exporter/stackdriver v0.13.4
 	github.com/Azure/azure-sdk-for-go => github.com/Azure/azure-sdk-for-go v38.2.0+incompatible
-	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.4.0+incompatible
-	knative.dev/caching => knative.dev/caching v0.0.0-20200521155757-e78d17bc250e
-	knative.dev/pkg => knative.dev/pkg v0.0.0-20200528142800-1c6815d7e4c9
-)
-
-// Pin k8s deps to 1.16.5
-replace (
-	k8s.io/api => k8s.io/api v0.16.5
-	k8s.io/apimachinery => k8s.io/apimachinery v0.16.5
-	k8s.io/client-go => k8s.io/client-go v0.16.5
-	k8s.io/code-generator => k8s.io/code-generator v0.16.5
+	github.com/Azure/go-autorest => github.com/Azure/go-autorest v14.2.0+incompatible
+	github.com/go-logr/logr => github.com/go-logr/logr v0.3.0
+	github.com/go-logr/zapr => github.com/go-logr/zapr v0.3.0
+	github.com/mattn/go-sqlite3 => github.com/mattn/go-sqlite3 v1.10.0
+	golang.org/x/text => golang.org/x/text v0.3.3 // Required to fix CVE-2020-14040
+	k8s.io/api => k8s.io/api v0.19.7
+	k8s.io/client-go => k8s.io/client-go v0.19.7
 )
