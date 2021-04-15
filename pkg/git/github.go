@@ -56,6 +56,9 @@ func (g GitHubPoller) Poll(repo string, pr pollingv1.PollStatus) (pollingv1.Poll
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return pollingv1.PollStatus{}, nil, fmt.Errorf("failed to read response body: %w", err)
+	}
 	var gc map[string]interface{}
 	err = json.Unmarshal(body, &gc)
 	if err != nil {

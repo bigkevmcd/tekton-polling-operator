@@ -116,6 +116,7 @@ spec:
   url: https://github.com/my-org/my-repo.git
   ref: main
   frequency: 2m
+  type: github # can also be gitlab
   pipelineRef:
     name: github-poll-pipeline
     params:
@@ -168,6 +169,34 @@ spec:
           value: $(params.sha)
         - name: url
           value: $(params.repoURL)
+```
+
+## Workspaces
+
+Pipelines use workspaces to communicate between tasks, and this allows you to mount a workspace in the pipeline:
+
+```yaml
+apiVersion: polling.tekton.dev/v1alpha1
+kind: Repository
+metadata:
+  name: example-repository
+spec:
+  url: https://github.com/my-org/my-repo.git
+  ref: main
+  frequency: 5m
+  type: github
+  pipelineRef:
+    name: github-poll-pipeline
+    serviceAccountName: example-sa
+    params:
+    - name: sha
+      expression: commit.sha
+    - name: repoURL
+      expression: repoURL
+    workspaces:
+      - name: git-source
+        persistentVolumeClaim:
+          claimName: tekton-volume
 ```
 
 ## Local Development
