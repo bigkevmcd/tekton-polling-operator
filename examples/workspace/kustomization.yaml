@@ -1,0 +1,4 @@
+resources:
+  - pvc.yaml
+  - pipeline_with_workspace.yaml
+  - repository.yaml

@@ -1,0 +1,20 @@
+apiVersion: polling.tekton.dev/v1alpha1
+kind: Repository
+metadata:
+  name: example-repository
+spec:
+  url: https://github.com/my-org/my-repo.git
+  ref: master
+  frequency: 5m
+  type: github
+  pipelineRef:
+    name: github-poll-pipeline
+    params:
+    - name: sha
+      expression: commit.sha
+    - name: repoURL
+      expression: repoURL
+    workspaces:
+      - name: source
+        persistentVolumeClaim:
+          claimName: demo-pvc
