@@ -6,6 +6,7 @@ spec:
   url: https://github.com/my-org/my-repo.git
   ref: main
   frequency: 5m
+  type: github # can also be gitlab
   pipelineRef:
     name: github-poll-pipeline
     params:
