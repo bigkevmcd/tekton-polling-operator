@@ -18,7 +18,7 @@ $ kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/previ
 Then you'll need to install the polling-operator.
 
 ```shell
-$ kubectl apply -f https://github.com/bigkevmcd/tekton-polling-operator/releases/download/v0.2.0/release-v0.2.0.yaml
+$ kubectl apply -f https://github.com/bigkevmcd/tekton-polling-operator/releases/download/v0.4.0/release-v0.4.0.yaml
 ```
 
 ## GitHub
