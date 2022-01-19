@@ -130,9 +130,26 @@ spec:
     key: token
 ```
 
-This will fetch the secret, and get the value in `token` and use that to
-authenticate the API call to GitHub.
-
+This will fetch the secret, and get the value in `token` and use that to authenticate the API call to GitHub. The secret may contain multiple values. For example: 
+```yaml
+piVersion: v1
+kind: Secret
+metadata:
+  name: github-user-pass
+  annotations:
+    tekton.dev/git-0: https://github.com/
+type: kubernetes.io/basic-auth
+stringData:
+    username: "shohagrana64"
+    password: "githubAccessToken(PAT)"
+```
+In such a case, the auth part will be:
+```yaml
+  auth:
+    secretRef:
+      name:  github-user-pass
+    key: password
+```
 ## Creating PipelineRuns in other namespaces
 
 See the documentation [here](docs/configuring_security.md) for how to grant
