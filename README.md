@@ -132,7 +132,7 @@ spec:
 
 This will fetch the secret, and get the value in `token` and use that to authenticate the API call to GitHub. The secret may contain multiple values and you can configure which key within the `Secret` by setting the `key` field in the `spec.auth` configuration, this defaults to `token`.
 ```yaml
-piVersion: v1
+apiVersion: v1
 kind: Secret
 metadata:
   name: github-user-pass
