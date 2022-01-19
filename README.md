@@ -140,7 +140,7 @@ metadata:
     tekton.dev/git-0: https://github.com/
 type: kubernetes.io/basic-auth
 stringData:
-    username: "shohagrana64"
+    username: "githubUsername"
     password: "githubAccessToken(PAT)"
 ```
 In such a case, the auth part will be:
