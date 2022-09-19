@@ -3,15 +3,15 @@ module github.com/bigkevmcd/tekton-polling-operator
 go 1.14
 
 require (
-	github.com/go-logr/logr v0.4.0
-	github.com/golang/protobuf v1.4.3
+	github.com/go-logr/logr v1.2.3
+	github.com/golang/protobuf v1.5.2
 	github.com/google/cel-go v0.6.0
-	github.com/google/go-cmp v0.5.4
+	github.com/google/go-cmp v0.5.8
 	github.com/operator-framework/operator-sdk v0.19.4
 	github.com/spf13/pflag v1.0.5
 	github.com/tektoncd/pipeline v0.23.0
 	k8s.io/api v0.19.7
-	k8s.io/apimachinery v0.19.7
+	k8s.io/apimachinery v0.25.1
 	k8s.io/client-go v12.0.0+incompatible
 	sigs.k8s.io/controller-runtime v0.6.0
 )
