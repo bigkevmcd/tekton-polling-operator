@@ -589,10 +589,13 @@ spec:
                     type: string
                   sha:
                     type: string
+                  tag:
+                    type: string
                 required:
                 - etag
                 - ref
                 - sha
+                - tag
                 type: object
             type: object
         type: object
