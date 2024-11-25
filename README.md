@@ -1,5 +1,7 @@
 # tekton-polling-operator ![Go](https://github.com/bigkevmcd/tekton-polling-operator/workflows/Go/badge.svg)
 
+**NOTE: This has been deprecated in favour of a different approach at https://github.com/gitops-tools/gitpoller-controller - it's still a bit early, but it's a more maintainable approach**
+
 A simple git repository poller.
 
 This is a Git repository poller that detects changes in a Git repository, and triggers the execution of a Tekton PipelineRun.
