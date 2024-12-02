@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	pollingv1alpha1 "github.com/bigkevmcd/tekton-polling-operator/pkg/apis/polling/v1alpha1"
@@ -32,7 +33,11 @@ func TestNewGitHubPoller(t *testing.T) {
 
 func TestGitHubWithUnknownETag(t *testing.T) {
 	etag := `W/"878f43039ad0553d0d3122d8bc171b01"`
-	as := makeGitHubAPIServer(t, testToken, "/repos/testing/repo/commits/master", etag, mustReadFile(t, "testdata/github_commit.json"))
+	as := makeGitHubAPIServer(t, testToken, "/repos/testing/repo/commits/master",
+		etag,
+		mustReadFile(t, "testdata/github_commit.json"),
+		mustReadFile(t, "testdata/github_tags.json"),
+	)
 	t.Cleanup(as.Close)
 	g := NewGitHubPoller(as.Client(), as.URL, testToken)
 	g.endpoint = as.URL
@@ -48,6 +53,9 @@ func TestGitHubWithUnknownETag(t *testing.T) {
 	if polled.SHA != "7638417db6d59f3c431d3e1f261cc637155684cd" {
 		t.Errorf("Poll() SHA got %s, want %s", polled.SHA, "7638417db6d59f3c431d3e1f261cc637155684cd")
 	}
+	if polled.Tag != "5.0.3" {
+		t.Errorf("Poll() TAG got %s, want %s", polled.Tag, "5.0.3")
+	}
 	if m := body["message"]; m != "added readme, because im a good github citizen" {
 		t.Fatalf("body doesn't match:\n%s", m)
 	}
@@ -55,7 +63,7 @@ func TestGitHubWithUnknownETag(t *testing.T) {
 
 func TestGitHubWithKnownTag(t *testing.T) {
 	etag := `W/"878f43039ad0553d0d3122d8bc171b01"`
-	as := makeGitHubAPIServer(t, testToken, "/repos/testing/repo/commits/master", etag, nil)
+	as := makeGitHubAPIServer(t, testToken, "/repos/testing/repo/commits/master", etag, nil, nil)
 	t.Cleanup(as.Close)
 	g := NewGitHubPoller(as.Client(), as.URL, testToken)
 	g.endpoint = as.URL
@@ -75,7 +83,7 @@ func TestGitHubWithKnownTag(t *testing.T) {
 
 func TestGitHubWithNotFoundResponse(t *testing.T) {
 	etag := `W/"878f43039ad0553d0d3122d8bc171b01"`
-	as := makeGitHubAPIServer(t, testToken, "/repos/testing/repo/commits/master", etag, nil)
+	as := makeGitHubAPIServer(t, testToken, "/repos/testing/repo/commits/master", etag, nil, nil)
 	t.Cleanup(as.Close)
 	g := NewGitHubPoller(as.Client(), as.URL, testToken)
 	g.endpoint = as.URL
@@ -90,7 +98,7 @@ func TestGitHubWithNotFoundResponse(t *testing.T) {
 // respond with a 404.
 func TestGitHubWithBadAuthentication(t *testing.T) {
 	etag := `W/"878f43039ad0553d0d3122d8bc171b01"`
-	as := makeGitHubAPIServer(t, testToken, "/repos/testing/repo/commits/master", etag, nil)
+	as := makeGitHubAPIServer(t, testToken, "/repos/testing/repo/commits/master", etag, nil, nil)
 	t.Cleanup(as.Close)
 	g := NewGitHubPoller(as.Client(), as.URL, "anotherToken")
 	g.endpoint = as.URL
@@ -104,7 +112,7 @@ func TestGitHubWithBadAuthentication(t *testing.T) {
 // With no auth-token, no auth header should be sent.
 func TestGitHubWithNoAuthentication(t *testing.T) {
 	etag := `W/"878f43039ad0553d0d3122d8bc171b01"`
-	as := makeGitHubAPIServer(t, "", "/repos/testing/repo/commits/master", etag, nil)
+	as := makeGitHubAPIServer(t, "", "/repos/testing/repo/commits/master", etag, nil, nil)
 	t.Cleanup(as.Close)
 	g := NewGitHubPoller(as.Client(), as.URL, "")
 	g.endpoint = as.URL
@@ -117,9 +125,11 @@ func TestGitHubWithNoAuthentication(t *testing.T) {
 
 // makeAPIServer is used during testing to create an HTTP server to return
 // fixtures if the request matches.
-func makeGitHubAPIServer(t *testing.T, authToken, wantPath, etag string, response []byte) *httptest.Server {
+func makeGitHubAPIServer(t *testing.T, authToken, wantPath, etag string, response []byte, tagResponse []byte) *httptest.Server {
 	return httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != wantPath {
+		parts := strings.Split(wantPath, "/")
+		tagsPath := strings.Join(parts[0:4], "/") + "/tags"
+		if r.URL.Path != wantPath && r.URL.Path != tagsPath {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
@@ -141,9 +151,14 @@ func makeGitHubAPIServer(t *testing.T, authToken, wantPath, etag string, respons
 			w.WriteHeader(http.StatusUnsupportedMediaType)
 			return
 		}
-		w.Header().Set("ETag", etag)
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(response)
+		if r.URL.Path == wantPath {
+			w.Header().Set("ETag", etag)
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(response)
+		} else if r.URL.Path == tagsPath {
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(tagResponse)
+		}
 	}))
 }
 
